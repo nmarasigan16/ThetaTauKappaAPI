@@ -5,12 +5,10 @@ An API for upcoming webapp and mobile app for members of the Kappa chapter of Th
 - Log hours at events
 - Log attendence at general meetings
 - Check hours
--
 
 # Tenative Functions
 - Voting
 - RSVP to events
-- 
 
 # Exec only functions
 - Take attendence and process excuses
