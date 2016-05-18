@@ -5,6 +5,16 @@ from django.db import models
 #to extend the user class of rest_auth app
 from django.contrib.auth.models import User
 
+#chapter class
+class Chapter(models.Model):
+    chapter_id = models.AutoField(primary_key=True)
+    #TODO add more chapters if they want to use the API
+    CHAPTER_CHOICES = [
+            ('K', 'Kappa')
+    ]
+    chapter_name = models.CharField(max_length=2, choices = CHAPTER_CHOICES, default='K')
+    university = models.CharField(max_length = 100)
+
 
 #user class
 class UserProfile(models.Model):
@@ -15,11 +25,7 @@ class UserProfile(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length = 50)
 
-    #TODO add more chapters if they want to use the API
-    CHAPTER_CHOICES = [
-            ('K', 'Kappa')
-    ]
-    chapter = models.CharField(max_length=2, choices = CHAPTER_CHOICES, default = 'K')
+    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
 
     YEAR_IN_SCHOOL_CHOICES = [
             ('FR', 'Freshman'),
@@ -54,6 +60,8 @@ class UserProfile(models.Model):
             ('A', 'Alumni'),
     ]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='B')
+
+    officer = models.BooleanField(default=False)
 
     create_date = models.DateField(auto_now_add=True)
 
