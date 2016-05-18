@@ -45,11 +45,13 @@ Meeting class
 
 Has attributes:
     -meeting_id
+    -password
     -mtype
     -date
 """
 class Meeting(models.Model):
     meeting_id = models.AutoField(primary_key=True)
+    password = models.CharField(max_length=50, null=True)
     MEETING_TYPES = [
             ('PM', 'Pledge Meeting'),
             ('GM', 'General Meeting'),
@@ -71,7 +73,6 @@ Has attributes:
     -year in school
     -major
     -current status
-    -whether or not they are an officer
     -create_date (for analytics)
 """
 class UserProfile(models.Model):
@@ -122,7 +123,6 @@ class UserProfile(models.Model):
     events = models.ManyToManyField(Event)
     meetings = models.ManyToManyField(Meeting)
 
-    officer = models.BooleanField(default=False)
 
     create_date = models.DateField(auto_now_add=True)
 
@@ -173,6 +173,9 @@ Gives additional attributes:
     -attendance password
     -excuse
 
+    #used for status
+    -officer
+
 """
 class Brother(models.Model):
     #extends user class
@@ -188,4 +191,6 @@ class Brother(models.Model):
     attendance_pass = models.CharField(max_length = 50)
     excuse = models.TextField()
 
+    #officer status
+    officer = models.BooleanField(default=False)
 
