@@ -13,7 +13,7 @@ class Chapter(models.Model):
             ('K', 'Kappa')
     ]
     chapter_name = models.CharField(max_length=2, choices = CHAPTER_CHOICES, default='K')
-    university = models.CharField(max_length = 100)
+    university = models.TextField()
 
 
 #user class
@@ -25,6 +25,7 @@ class UserProfile(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length = 50)
 
+    #for which chapter user belongs to
     chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
 
     YEAR_IN_SCHOOL_CHOICES = [
@@ -71,7 +72,8 @@ class UserProfile(models.Model):
 
 #Pledge class
 class Pledge(models.Model):
-    user_id = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    #extends user class
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
 
     #for signatures
     professional = models.PositiveIntegerField(default=0)
@@ -83,7 +85,8 @@ class Pledge(models.Model):
 
 #Brother class
 class Brother(models.Model):
-    user_id = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    #extends user class
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
 
     #event attendance
     brotherhood = models.PositiveIntegerField(default=0)
@@ -92,6 +95,7 @@ class Brother(models.Model):
 
     #gm stuff
     gms = models.PositiveIntegerField(default=0)
-
+    attendance_pass = models.CharField(max_length = 50)
+    excuse = models.TextField()
 
 
