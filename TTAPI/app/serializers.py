@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('user', 'id', 'name', 'chapter_id', 'year', 'major',
                 'status', 'events', 'meetings', 'create_date')
 
-    #TODO add create function
+        #TODO add create function
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('userprofile', {})
