@@ -21,6 +21,8 @@ class Chapter(models.Model):
     ]
     chapter_name = models.CharField(max_length=2, choices = CHAPTER_CHOICES, default='K')
     university = models.TextField()
+    class Meta:
+        ordering = ['chapter_name']
 
 """
 Event class
@@ -120,8 +122,8 @@ class UserProfile(models.Model):
     ]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='B')
 
-    events = models.ManyToManyField(Event)
-    meetings = models.ManyToManyField(Meeting)
+    events = models.ManyToManyField(Event, blank = True)
+    meetings = models.ManyToManyField(Meeting, blank = True)
 
 
     create_date = models.DateField(auto_now_add=True)

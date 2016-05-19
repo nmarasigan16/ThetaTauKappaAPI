@@ -48,7 +48,6 @@ class ChapterSerializer(serializers.ModelSerializer):
         model = Chapter
         fields = ('chapter_id', 'chapter_name', 'university')
 
-
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
