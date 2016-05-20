@@ -47,6 +47,9 @@ INSTALLED_APPS = [
     'allauth.account',
     'rest_auth.registration',
     'django.contrib.sites',
+
+    #corsheaders
+    'corsheaders',
 ]
 SITE_ID = 1
 
@@ -59,9 +62,15 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    #corsheaders
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'TTAPI.urls'
+#TODO whitelist app url
+#url: https://github.com/ottoyiu/django-cors-headers/
 
 TEMPLATES = [
     {
