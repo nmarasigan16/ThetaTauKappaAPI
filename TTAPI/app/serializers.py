@@ -1,52 +1,48 @@
 from rest_framework import serializers
-from app.models import Chapter, Event, Meeting, Pledge, Brother
+from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics
 from app.models import UserProfile as User
 
 #for rest_auth user
 from rest_auth.serializers import UserDetailsSerializer
 
-class UserSerializer(serializers.ModelSerializer):
-    user = UserDetailsSerializer()
+class UserSerializer(UserDetailsSerializer):
 
-    class Meta:
-        model = User
-        fields = ('user', 'id', 'name', 'chapter_id', 'year', 'major',
-                'status', 'events', 'meetings', 'create_date')
+    id = serializers.IntegerField(read_only=True)
+    chapter_id = serializers.PrimaryKeyRelatedField(read_only=True)
+    create_date = serializers.DateTimeField(read_only=True)
 
-        #TODO add create function
+    class Meta(UserDetailsSerializer.Meta):
+        fields = UserDetailsSerializer.Meta.fields + ('id', 'chapter_id', 'create_date',)
+
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('userprofile', {})
         id = profile_data.get('id')
-        name = profile_data.get('name')
         chapter_id = profile_data.get('chapter_id')
-        year = profile_data.get('year')
-        major = profile_data.get('major')
-        status = profile_data.get('status')
-        events = profile_data.get('events')
-        meetings = profile_data.get('meetings')
+        create_date = profile_data.get('create_date')
 
         instance = super(UserSerializer, self).update(instance, validated_data)
 
         #get and update user profile
         profile = instance.userprofile
-        if profile_data and id and name and chapter_id and year and major and status and events and meetings:
+        if profile_data and id and chapter_id:
             profile.id = id
-            profile.name = name
             profile.chapter_id = chapter_id
-            profile.year = year
-            profile.major = major
-            profile.status = status
-            profile.events = events
-            profile.meetings = meetings
+            profile.create_date = create_date
         return instance
 
-#TODO add update and create methods to all those that need it
 
 class ChapterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chapter
         fields = ('chapter_id', 'chapter_name', 'university')
+
+class DemographicsSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = Demographics
+        fields = ('user', 'name', 'major', 'status', 'city', 'events', 'meetings')
+
 
 class EventSerializer(serializers.ModelSerializer):
     class Meta:

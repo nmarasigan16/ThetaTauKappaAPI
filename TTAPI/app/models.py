@@ -25,6 +25,53 @@ class Chapter(models.Model):
         ordering = ['chapter_name']
 
 """
+Meeting class
+
+Has attributes:
+    -meeting_id
+    -password
+    -mtype
+    -date
+"""
+class Meeting(models.Model):
+    meeting_id = models.AutoField(primary_key=True)
+    password = models.CharField(max_length=50, default="passionfruit")
+    MEETING_TYPES = [
+            ('PM', 'Pledge Meeting'),
+            ('GM', 'General Meeting'),
+            ('VO', 'Voting'),
+            ('IN', 'Initiation'),
+    ]
+    mtype = models.CharField(max_length=2, choices=MEETING_TYPES, default='GM')
+    date = models.DateField()
+    attendance_taken = models.BooleanField(default=False)
+
+
+"""
+Class for a user
+
+Has attributes:
+    -user (to extend the rest_auth user)
+    -id (to identify user)
+    -chapter_id (foreign key)
+    -create_date (for analytics)
+"""
+class UserProfile(models.Model):
+    #predefined user model
+    user = models.OneToOneField(User)
+
+    #custom fields for user
+    id = models.AutoField(primary_key=True)
+
+    #for which chapter user belongs to
+    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+
+    create_date = models.DateField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['chapter_id']
+
+"""
 Event class
 
 Has attributes:
@@ -36,6 +83,7 @@ Has attributes:
 """
 class Event(models.Model):
     event_id = models.AutoField(primary_key=True)
+    creator = models.ForeignKey(UserProfile, default=0, on_delete=models.SET_DEFAULT)
     date = models.DateField()
     time = models.TimeField()
     location = models.TextField()
@@ -43,50 +91,19 @@ class Event(models.Model):
 
 
 """
-Meeting class
-
+Class for demographics.  Holds contact info
+Made partially out of laziness, and also partially to abstract passwords and ids from users
 Has attributes:
-    -meeting_id
-    -password
-    -mtype
-    -date
-"""
-class Meeting(models.Model):
-    meeting_id = models.AutoField(primary_key=True)
-    password = models.CharField(max_length=50, null=True)
-    MEETING_TYPES = [
-            ('PM', 'Pledge Meeting'),
-            ('GM', 'General Meeting'),
-            ('VO', 'Voting'),
-            ('IN', 'Initiation'),
-    ]
-    mtype = models.CharField(max_length=2, choices=MEETING_TYPES, default='GM')
-    date = models.DateField()
-
-
-"""
-Class for a user
-
-Has attributes:
-    -user (to extend the rest_auth user)
-    -id (to identify user)
     -name
-    -chapter_id (foreign key)
     -year in school
     -major
     -current status
-    -create_date (for analytics)
 """
-class UserProfile(models.Model):
-    #predefined user model
-    user = models.OneToOneField(User)
-
-    #custom fields for user
-    id = models.AutoField(primary_key=True)
+class Demographics(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length = 50)
 
-    #for which chapter user belongs to
-    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+    #TODO add phone number regex
 
     YEAR_IN_SCHOOL_CHOICES = [
             ('FR', 'Freshman'),
@@ -121,15 +138,14 @@ class UserProfile(models.Model):
             ('A', 'Alumni'),
     ]
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='B')
+    city = models.CharField(max_length=30, blank=True)
 
     events = models.ManyToManyField(Event, blank = True)
     meetings = models.ManyToManyField(Meeting, blank = True)
 
-
-    create_date = models.DateField(auto_now_add=True)
-
     class Meta:
-        ordering = ['chapter_id', 'name']
+        ordering = ['name']
+
 
 """
 Class for pledges
