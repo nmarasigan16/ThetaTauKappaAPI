@@ -103,6 +103,8 @@ class Demographics(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length = 50)
 
+    email = models.EmailField(null=True)
+
     #TODO add phone number regex
 
     YEAR_IN_SCHOOL_CHOICES = [
