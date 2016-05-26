@@ -20,6 +20,8 @@ from app.serializers import (
 from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics
 from app.models import UserProfile as User
 
+#TODO import functions from other files
+
 
 """
 Temporary functions for testing
@@ -65,9 +67,52 @@ Officer only functions:
 - Initiate pledges
 - Delete user (in case drops)
 """
+@api_view(['GET'])
+def check_officer(request, pk):
+    permission_classes = (IsAuthenticated,)
+    try:
+        bro = Brother.get(pk=pk)
+        is_officer = bro.officer
+    except Brother.DoesNotExist:
+        return response(status=status.HTTP_404_NOT_FOUND)
+   if request.method == 'GET':
+       if is_officer
+           return response(status=status.HTTP_200_OK)
+       else
+           return response(status=status.HTTP_403_FORBIDDEN)
 
-#TODO implement these functions
+"""
+This view is for posting events
+NOTE:
+    I would like to make this so that only
+    officers can post events. At the moment
+    any user that is logged in can create events
+"""
+class EventDetailCreate(generics.CreateAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+
+class EventDetailDestroy(generics.DestroyAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+
+class EventDetailUpdate(generics.RetrieveUpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+"""
+This is for meetings
+Same note as events
+"""
+class MeetingDetailCreate(generics.CreateAPIView):
+    permission_classes= (IsAuthenticated,)
+    queryset = Event.objects.all()
+    serializer_class = MeetingSerializer
 
 
 
+#TODO initiate pledges
+#can delete with a for loop and .delete, but how to create multiple users?
 

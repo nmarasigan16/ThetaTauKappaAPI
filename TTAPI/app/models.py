@@ -208,8 +208,8 @@ class Brother(models.Model):
 
     #gm stuff
     gms = models.PositiveIntegerField(default=0)
-    attendance_pass = models.CharField(max_length = 50)
-    excuse = models.TextField()
+    attendance_pass = models.CharField(max_length = 50, blank=True)
+    excuse = models.TextField(blank=True)
 
     #officer status
     officer = models.BooleanField(default=False)
