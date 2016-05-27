@@ -20,6 +20,9 @@ from app.serializers import (
 from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics
 from app.models import UserProfile as User
 
+#external files
+import officer_functions, all_functions
+
 #TODO import functions from other files
 
 
@@ -83,12 +86,12 @@ def check_officer(request, pk):
         bro = Brother.get(pk=pk)
         is_officer = bro.officer
     except Brother.DoesNotExist:
-        return response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
         if is_officer:
-            return response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
         else:
-            return response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
 """
 This view is for posting events
@@ -104,7 +107,7 @@ class EventDetailCreate(generics.CreateAPIView):
     serializer_class = EventSerializer
 
 class EventDetailDestroy(generics.DestroyAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = Event.objects.all()
     serializer_class = EventSerializer
 
@@ -126,6 +129,10 @@ class MeetingDetailUpdate(generics.RetrieveUpdateAPIView):
     queryset = Meeting.objects.all()
     serializer_class = MeetingSerializer
 
+class MeetingDetailDestroy(generics.DestroyAPIView):
+    permission_classes = (IsAdminUser,)
+    queryset = Meeting.objects.all()
+    serializer_class = MeetingSerializer
 
 """
 Delete user function
@@ -142,17 +149,23 @@ def delete_user(request, pk):
         user = User.get(pk=pk)
         user.delete()
     except User.DoesNotExist:
-        return response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        return response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
 
-"""
 @api_view(['GET'])
 def initiate_pledges(request, pk):
     permission_classes=(IsAdminUser,)
     try:
-"""
+        chapter = Chapter.get(pk=pk)
+        members = chapter.UserProfile_set.all()
+        officer_functions.intiate(members)
+    except Chapter.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        return Response("Pledges for " + chapter.name + " intiated", status=status.HTTP_200_OK)
+
 
 
 
