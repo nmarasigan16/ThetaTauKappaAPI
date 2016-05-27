@@ -41,18 +41,18 @@ class DemographicsSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Demographics
-        fields = ('user', 'name', 'major', 'status', 'city', 'events', 'meetings')
+        fields = ('user', 'name', 'email',  'major', 'status', 'city', 'events', 'meetings')
 
 
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ('event_id', 'date', 'time', 'location', 'about')
+        fields = ('event_id', 'creator', 'date', 'time', 'location', 'about', 'chapter')
 
 class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Meeting
-        fields = ('meeting_id', 'password', 'mtype', 'date')
+        fields = ('meeting_id', 'password', 'mtype', 'date', 'chapter')
 
 class PledgeSerializer(serializers.ModelSerializer):
     user = UserSerializer()

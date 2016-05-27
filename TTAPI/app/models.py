@@ -45,6 +45,7 @@ class Meeting(models.Model):
     mtype = models.CharField(max_length=2, choices=MEETING_TYPES, default='GM')
     date = models.DateField()
     attendance_taken = models.BooleanField(default=False)
+    chapter =  models.ForeignKey(Chapter, default=0, on_delete=models.CASCADE)
 
 
 """
@@ -88,6 +89,7 @@ class Event(models.Model):
     time = models.TimeField()
     location = models.TextField()
     about = models.TextField()
+    chapter =  models.ForeignKey(Chapter, default=0, on_delete=models.CASCADE)
 
 
 """

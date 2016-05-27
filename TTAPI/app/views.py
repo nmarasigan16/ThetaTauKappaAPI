@@ -67,6 +67,15 @@ Officer only functions:
 - Initiate pledges
 - Delete user (in case drops)
 """
+
+"""
+Check if user is an officer
+@param:
+    request type
+    id of user to check
+@return
+    status of request
+"""
 @api_view(['GET'])
 def check_officer(request, pk):
     permission_classes = (IsAuthenticated,)
@@ -119,10 +128,16 @@ class MeetingDetailUpdate(generics.RetrieveUpdateAPIView):
 
 
 """
-Initiating pledges or deleting user
+Delete user function
+@param
+    type of request
+    id of user to be deleted
+@return
+    response determining if user was deleted or dne
 """
 @api_view(['GET'])
 def delete_user(request, pk):
+    permission_classes=(IsAdminUser,)
     try:
         user = User.get(pk=pk)
         user.delete()
@@ -131,4 +146,41 @@ def delete_user(request, pk):
 
     if request.method == 'GET':
         return response(status=status.HTTP_200_OK)
+
+"""
+@api_view(['GET'])
+def initiate_pledges(request, pk):
+    permission_classes=(IsAdminUser,)
+    try:
+"""
+
+
+
+"""
+Abstraction functions. Callable from api_view
+"""
+
+"""
+Checks if a person is a certain status
+@param
+    User to check
+    status to check for
+@return
+    Boolean value of check.
+    True if brother is status, false if not
+"""
+def status_check(user, status):
+    if(user.demographics.status == status):
+        return True
+    return False
+
+"""
+Initiate function.  Deletes a users pledge instance and
+initializes a brother instance linked to the user
+@param
+    User to initiate
+"""
+def initiate(user):
+    user.pledge.delete()
+    new_bro = Brother(user=user)
 
