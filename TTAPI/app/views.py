@@ -75,7 +75,7 @@ def check_officer(request, pk):
         is_officer = bro.officer
     except Brother.DoesNotExist:
         return response(status=status.HTTP_404_NOT_FOUND)
-   if request.method == 'GET':
+    if request.method == 'GET':
        if is_officer
            return response(status=status.HTTP_200_OK)
        else
@@ -86,7 +86,8 @@ This view is for posting events
 NOTE:
     I would like to make this so that only
     officers can post events. At the moment
-    any user that is logged in can create events
+    any user that is logged in can create
+    and edit events.  Also see if I can determine owner
 """
 class EventDetailCreate(generics.CreateAPIView):
     permission_classes = (IsAuthenticated,)
@@ -111,8 +112,23 @@ class MeetingDetailCreate(generics.CreateAPIView):
     queryset = Event.objects.all()
     serializer_class = MeetingSerializer
 
+class MeetingDetailUpdate(generics.RetrieveUpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    queryset = Meeting.objects.all()
+    serializer_class = MeetingSerializer
 
 
-#TODO initiate pledges
-#can delete with a for loop and .delete, but how to create multiple users?
+"""
+Initiating pledges or deleting user
+"""
+@api_view([GET])
+def delete_user(request, pk):
+    try:
+        user = User.get(pk=pk)
+        user.delete()
+    except User.DoesNotExist:
+        return response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return response(status=status.HTTP_200_OK)
 
