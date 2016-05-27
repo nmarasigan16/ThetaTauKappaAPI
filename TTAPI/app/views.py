@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -76,10 +76,10 @@ def check_officer(request, pk):
     except Brother.DoesNotExist:
         return response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
-       if is_officer
-           return response(status=status.HTTP_200_OK)
-       else
-           return response(status=status.HTTP_403_FORBIDDEN)
+        if is_officer:
+            return response(status=status.HTTP_200_OK)
+        else:
+            return response(status=status.HTTP_403_FORBIDDEN)
 
 """
 This view is for posting events
@@ -121,7 +121,7 @@ class MeetingDetailUpdate(generics.RetrieveUpdateAPIView):
 """
 Initiating pledges or deleting user
 """
-@api_view([GET])
+@api_view(['GET'])
 def delete_user(request, pk):
     try:
         user = User.get(pk=pk)
