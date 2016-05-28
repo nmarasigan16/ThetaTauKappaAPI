@@ -67,7 +67,7 @@ All Accessible Functions: By brothers and exec
 def check_reqs(request, pk):
     permission_classes = (IsAuthenticated,)
     try:
-        user = User.get(pk=pk)
+        user = User.objects.objects.get(pk=pk)
         reqs = all_functions.format_reqs(user)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
@@ -79,8 +79,8 @@ def add_event(request, pku, pke, hours):
     permission_classes = (IsAuthenticated,)
     if request.method == 'PUT':
         try:
-            user = User.get(pk = pku)
-            event = Event.get(pk = pke)
+            user = User.objects.get(pk = pku)
+            event = Event.objects.get(pk = pke)
             outcome = all_functions.adder(user, event, hours)
         except User.DoesNotExist or Event.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -106,7 +106,7 @@ Check if user is an officer
 def check_officer(request, pk):
     permission_classes = (IsAuthenticated,)
     try:
-        bro = Brother.get(pk=pk)
+        bro = Brother.objects.get(pk=pk)
         is_officer = bro.officer
     except Brother.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
@@ -170,7 +170,7 @@ def delete_user(request, pk):
     permission_classes=(IsAdminUser,)
     if request.method == 'DELETE':
         try:
-            user = User.get(pk=pk)
+            user = User.objects.get(pk=pk)
             user.delete()
         except User.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -182,7 +182,7 @@ def initiate_pledges(request, pk):
     permission_classes=(IsAdminUser,)
     if request.method == 'PUT':
         try:
-            chapter = Chapter.get(pk=pk)
+            chapter = Chapter.objects.get(pk=pk)
             members = chapter.UserProfile_set.all()
             officer_functions.intiate(members)
         except Chapter.DoesNotExist:
