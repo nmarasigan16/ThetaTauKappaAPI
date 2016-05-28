@@ -84,7 +84,7 @@ Has attributes:
 """
 class Event(models.Model):
     event_id = models.AutoField(primary_key=True)
-    creator = models.ForeignKey(UserProfile, default=0, on_delete=models.SET_DEFAULT)
+    creator = models.ForeignKey(UserProfile, default=0, on_delete=models.SET_DEFAULT, related_name='events')
     date = models.DateField()
     time = models.TimeField()
     duration = models.FloatField(default=0)
@@ -113,7 +113,8 @@ Has attributes:
     -current status
 """
 class Demographics(models.Model):
-    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True, related_name='demographics')
+
     name = models.CharField(max_length = 50)
 
     email = models.EmailField(null=True)
@@ -179,7 +180,7 @@ that a pledge needs to attend to become a brother
 """
 class Pledge(models.Model):
     #extends user class
-    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True, related_name='pledge')
 
     #for signatures
     family = models.PositiveIntegerField(default=0)
@@ -208,7 +209,7 @@ Gives additional attributes:
 """
 class Brother(models.Model):
     #extends user class
-    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True, related_name='brother')
 
 
     #gm stuff
@@ -220,7 +221,7 @@ class Brother(models.Model):
     officer = models.BooleanField(default=False)
 
 class Hours(models.Model):
-    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True, related_name='hours')
 
     #event attendance
     brotherhood = models.FloatField(default=0)

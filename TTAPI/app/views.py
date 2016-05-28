@@ -183,7 +183,7 @@ def initiate_pledges(request, pk):
     if request.method == 'PUT':
         try:
             chapter = Chapter.objects.get(pk=pk)
-            members = chapter.UserProfile_set.all()
+            members = chapter.members_set.all()
             officer_functions.intiate(members)
         except Chapter.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)

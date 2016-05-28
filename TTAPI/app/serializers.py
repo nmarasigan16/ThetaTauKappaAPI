@@ -5,6 +5,9 @@ from app.models import UserProfile as User
 #for rest_auth user
 from rest_auth.serializers import UserDetailsSerializer
 
+#TODO make create methods for user that automatically spawns a demographics object, and make a
+#create method for demographics that automatically creates either a pledge or brother object
+
 class UserSerializer(UserDetailsSerializer):
 
     id = serializers.IntegerField(read_only=True)
