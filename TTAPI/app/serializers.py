@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics
+from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Hours
 from app.models import UserProfile as User
 
 #for rest_auth user
@@ -47,7 +47,7 @@ class DemographicsSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ('event_id', 'creator', 'date', 'time', 'location', 'about', 'chapter')
+        fields = ('event_id', 'creator', 'date', 'time', 'duration', 'location', 'about', 'etype', 'chapter')
 
 class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,11 +58,16 @@ class PledgeSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Pledge
-        fields = ('user', 'professional', 'philanthropy', 'social', 'family', 'brother', 'pledge')
+        fields = ('user', 'family', 'brother', 'pledge')
 
 class BrotherSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Brother
-        fields = ('user', 'brotherhood', 'philanthropy', 'professional',
-                'gms', 'attendance_pass', 'excuse', 'officer')
+        fields = ('user', 'gms', 'attendance_pass', 'excuse', 'officer')
+
+class HourSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = Hours
+        fields = ('user', 'brotherhood', 'professional', 'philanthropy')

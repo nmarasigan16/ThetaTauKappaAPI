@@ -87,10 +87,21 @@ class Event(models.Model):
     creator = models.ForeignKey(UserProfile, default=0, on_delete=models.SET_DEFAULT)
     date = models.DateField()
     time = models.TimeField()
+    duration = models.FloatField(default=0)
     location = models.TextField()
     about = models.TextField()
+    EVENT_TYPES = [
+            ('PR', 'Professional'),
+            ('BR', 'Brotherhood'),
+            ('PH', 'Philanthropy'),
+    ]
+
+    etype = models.CharField(max_length=2, choices=EVENT_TYPES, default='PR')
+
     chapter =  models.ForeignKey(Chapter, default=0, on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ['date']
 
 """
 Class for demographics.  Holds contact info
@@ -171,14 +182,10 @@ class Pledge(models.Model):
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
 
     #for signatures
-    professional = models.PositiveIntegerField(default=0)
-    philanthropy = models.PositiveIntegerField(default=0)
-    social = models.PositiveIntegerField(default=0)
     family = models.PositiveIntegerField(default=0)
     brother = models.PositiveIntegerField(default=0)
     pledge = models.PositiveIntegerField(default=0)
 
-    #make it easy for historian to track all events
 
 """
 Class for brothers
@@ -203,10 +210,6 @@ class Brother(models.Model):
     #extends user class
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
 
-    #event attendance
-    brotherhood = models.FloatField(default=0)
-    philanthropy = models.FloatField(default=0)
-    professional = models.FloatField(default=0)
 
     #gm stuff
     gms = models.PositiveIntegerField(default=0)
@@ -216,3 +219,10 @@ class Brother(models.Model):
     #officer status
     officer = models.BooleanField(default=False)
 
+class Hours(models.Model):
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True)
+
+    #event attendance
+    brotherhood = models.FloatField(default=0)
+    philanthropy = models.FloatField(default=0)
+    professional = models.FloatField(default=0)

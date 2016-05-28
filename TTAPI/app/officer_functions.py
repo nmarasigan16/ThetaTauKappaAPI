@@ -26,7 +26,7 @@ initializes a brother instance linked to the user
 def upgrade(user):
     user.pledge.delete()
     new_bro = Brother(user=user)
-
+    new_bro.save()
 
 
 

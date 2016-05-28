@@ -58,9 +58,25 @@ All Accessible Functions: By brothers and exec
 - add pledge family event (pledges only)
 - add signatures (pledges only)
 """
+@api_view(['GET'])
+def check_reqs(request, pk):
+    try:
+        user = User.get(pk=pk)
+        reqs = all_functions.format_reqs(user)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request == 'GET':
+        return Response(reqs)
 
-#TODO implement these functions
-
+@api_view(['PUT'])
+def add_event(request, pku, pke, hours):
+    if request.method == 'PUT':
+        try:
+            user = User.get(pk = pku)
+            event = Event.get(pk = pke)
+            outcome = all_functions.adder(user, event, hours)
+        except User.DoesNotExist or Event.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 """
 Officer only functions:
@@ -142,58 +158,31 @@ Delete user function
 @return
     response determining if user was deleted or dne
 """
-@api_view(['GET'])
+@api_view(['DELETE'])
 def delete_user(request, pk):
     permission_classes=(IsAdminUser,)
-    try:
-        user = User.get(pk=pk)
-        user.delete()
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'DELETE':
+        try:
+            user = User.get(pk=pk)
+            user.delete()
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
-        return Response(status=status.HTTP_200_OK)
+        return Response(create_msg_dict("User deleted"), status=status.HTTP_200_OK)
 
-@api_view(['GET'])
+@api_view(['PUT'])
 def initiate_pledges(request, pk):
     permission_classes=(IsAdminUser,)
-    try:
-        chapter = Chapter.get(pk=pk)
-        members = chapter.UserProfile_set.all()
-        officer_functions.intiate(members)
-    except Chapter.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
-        return Response("Pledges for " + chapter.name + " intiated", status=status.HTTP_200_OK)
+    if request.method == 'PUT':
+        try:
+            chapter = Chapter.get(pk=pk)
+            members = chapter.UserProfile_set.all()
+            officer_functions.intiate(members)
+        except Chapter.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        return Response(create_msg_dict("Pledges for " + chapter.name + " intiated"), status=status.HTTP_200_OK)
 
 
-
-
-"""
-Abstraction functions. Callable from api_view
-"""
-
-"""
-Checks if a person is a certain status
-@param
-    User to check
-    status to check for
-@return
-    Boolean value of check.
-    True if brother is status, false if not
-"""
-def status_check(user, status):
-    if(user.demographics.status == status):
-        return True
-    return False
-
-"""
-Initiate function.  Deletes a users pledge instance and
-initializes a brother instance linked to the user
-@param
-    User to initiate
-"""
-def initiate(user):
-    user.pledge.delete()
-    new_bro = Brother(user=user)
-
+def create_msg_dict(msg):
+    return {'message':msg}
