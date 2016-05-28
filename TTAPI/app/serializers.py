@@ -33,12 +33,13 @@ class UserSerializer(UserDetailsSerializer):
 
 
 class ChapterSerializer(serializers.ModelSerializer):
+    members = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='userprofile-detail')
     class Meta:
         model = Chapter
-        fields = ('chapter_id', 'chapter_name', 'university')
+        fields = ('chapter_id', 'chapter_name', 'university', 'members')
 
 class DemographicsSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     class Meta:
         model = Demographics
         fields = ('user', 'name', 'email',  'major', 'status', 'city', 'events', 'meetings')
@@ -55,19 +56,19 @@ class MeetingSerializer(serializers.ModelSerializer):
         fields = ('meeting_id', 'password', 'mtype', 'date', 'chapter')
 
 class PledgeSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     class Meta:
         model = Pledge
         fields = ('user', 'family', 'brother', 'pledge')
 
 class BrotherSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     class Meta:
         model = Brother
         fields = ('user', 'gms', 'attendance_pass', 'excuse', 'officer')
 
 class HourSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     class Meta:
         model = Hours
         fields = ('user', 'brotherhood', 'professional', 'philanthropy')

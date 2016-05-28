@@ -65,7 +65,7 @@ class UserProfile(models.Model):
     id = models.AutoField(primary_key=True)
 
     #for which chapter user belongs to
-    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE)
+    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE, related_name='members')
 
     create_date = models.DateField(auto_now_add=True)
 
