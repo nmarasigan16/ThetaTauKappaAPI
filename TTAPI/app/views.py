@@ -38,6 +38,11 @@ EDIT 5/25:
     to other chapters
 
 """
+class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminUser,)
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
 class DemographicsViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Demographics.objects.all()
@@ -60,6 +65,7 @@ All Accessible Functions: By brothers and exec
 """
 @api_view(['GET'])
 def check_reqs(request, pk):
+    permission_classes = (IsAuthenticated,)
     try:
         user = User.get(pk=pk)
         reqs = all_functions.format_reqs(user)
@@ -70,6 +76,7 @@ def check_reqs(request, pk):
 
 @api_view(['PUT'])
 def add_event(request, pku, pke, hours):
+    permission_classes = (IsAuthenticated,)
     if request.method == 'PUT':
         try:
             user = User.get(pk = pku)
