@@ -35,7 +35,7 @@ Has attributes:
 """
 class Meeting(models.Model):
     meeting_id = models.AutoField(primary_key=True)
-    password = models.CharField(max_length=50, default="passionfruit")
+    password = models.CharField(max_length=50, blank=True, null=True)
     MEETING_TYPES = [
             ('PM', 'Pledge Meeting'),
             ('GM', 'General Meeting'),
