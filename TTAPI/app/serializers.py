@@ -17,6 +17,7 @@ class UserSerializer(UserDetailsSerializer):
     class Meta(UserDetailsSerializer.Meta):
         fields = UserDetailsSerializer.Meta.fields + ('id', 'chapter_id', 'create_date',)
 
+    #TODO make create method to spawn demographics and hours instances
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('userprofile', {})

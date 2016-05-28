@@ -183,12 +183,12 @@ def initiate_pledges(request, pk):
     if request.method == 'PUT':
         try:
             chapter = Chapter.objects.get(pk=pk)
-            members = chapter.members_set.all()
+            members = chapter.members.all()
             officer_functions.intiate(members)
         except Chapter.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        return Response(create_msg_dict("Pledges for " + chapter.name + " intiated"), status=status.HTTP_200_OK)
+        return Response(create_msg_dict("Pledges for " + chapter.chapter_name + " intiated"), status=status.HTTP_200_OK)
 
 
 def create_msg_dict(msg):
