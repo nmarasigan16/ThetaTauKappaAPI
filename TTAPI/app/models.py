@@ -156,8 +156,8 @@ class Demographics(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='B')
     city = models.CharField(max_length=30, blank=True)
 
-    events = models.ManyToManyField(Event, blank = True)
-    meetings = models.ManyToManyField(Meeting, blank = True)
+    events = models.ManyToManyField(Event, blank = True, related_name='attendees')
+    meetings = models.ManyToManyField(Meeting, blank = True, related_name='attendees')
 
     class Meta:
         ordering = ['name']
