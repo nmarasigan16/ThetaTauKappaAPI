@@ -84,6 +84,7 @@ Has attributes:
 """
 class Event(models.Model):
     event_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=30, default="Happy Hour")
     creator = models.ForeignKey(UserProfile, default=0, on_delete=models.SET_DEFAULT, related_name='events')
     date = models.DateField()
     time = models.TimeField()
@@ -96,7 +97,7 @@ class Event(models.Model):
             ('PH', 'Philanthropy'),
     ]
 
-    etype = models.CharField(max_length=2, choices=EVENT_TYPES, default='PR')
+    etype = models.CharField(max_length=2, choices=EVENT_TYPES, default='BR')
 
     chapter =  models.ForeignKey(Chapter, default=0, on_delete=models.CASCADE)
 
