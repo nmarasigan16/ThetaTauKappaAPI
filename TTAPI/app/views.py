@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from app.serializers import (
         UserSerializer, ChapterSerializer, DemographicsSerializer,
         EventSerializer, MeetingSerializer, PledgeSerializer,
-        BrotherSerializer
+        BrotherSerializer, UserDetailsSerializer
         )
 from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics
 from app.models import UserProfile as User
@@ -39,9 +39,9 @@ EDIT 5/25:
 
 """
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserDetailsSerializer
 
 class DemographicsViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -184,7 +184,7 @@ def initiate_pledges(request, pk):
         try:
             chapter = Chapter.objects.get(pk=pk)
             members = chapter.members.all()
-            officer_functions.intiate(members)
+            officer_functions.initiate(members)
         except Chapter.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 

@@ -111,6 +111,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 6,
+            }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -140,6 +143,20 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+ACCOUNT_EMAIL_REQUIRED=False
+ACCOUNT_AUTHENTICATION_METHOD='username'
+ACCOUNT_EMAIL_VERIFICATION="none"
+
+REST_FRAMEWORK = {
+        'DEFAULT_AUTHENTICATION_CLASSES':(
+            'rest_framework.authentication.SessionAuthentication',
+            'rest_framework.authentication.TokenAuthentication',
+            )
+        }
+
 REST_AUTH_SERIALIZERS = {
-        'USER_DETAILS_SERIALIZER': 'app.serializers.UserSerializer'
+        'USER_DETAILS_SERIALIZER': 'app.serializers.UserSerializer',
+    }
+REST_AUTH_REGISTER_SERIALIZERS = {
+        'REGISTER_SERIALIZER' : 'app.serializers.RegisterSerializer',
     }

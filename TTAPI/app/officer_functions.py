@@ -1,3 +1,5 @@
+from app.models import Brother
+
 
 """
 Helper functions
@@ -29,6 +31,7 @@ def upgrade(user):
     user.demographics.save()
     new_bro = Brother(user=user)
     new_bro.save()
+    user.save()
 
 
 

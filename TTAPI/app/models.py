@@ -58,14 +58,13 @@ Has attributes:
     -create_date (for analytics)
 """
 class UserProfile(models.Model):
-    #predefined user model
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, null=True)
 
     #custom fields for user
     id = models.AutoField(primary_key=True)
 
     #for which chapter user belongs to
-    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE, related_name='members')
+    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE, related_name='members', null=True)
 
     create_date = models.DateField(auto_now_add=True)
 
@@ -157,8 +156,6 @@ class Demographics(models.Model):
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='B')
     city = models.CharField(max_length=30, blank=True)
 
-    events = models.ManyToManyField(Event, blank = True, related_name='attendees')
-    meetings = models.ManyToManyField(Meeting, blank = True, related_name='attendees')
 
     class Meta:
         ordering = ['name']
@@ -228,3 +225,5 @@ class Hours(models.Model):
     brotherhood = models.FloatField(default=0)
     philanthropy = models.FloatField(default=0)
     professional = models.FloatField(default=0)
+    events = models.ManyToManyField(Event, blank = True, related_name='attendees')
+    meetings = models.ManyToManyField(Meeting, blank = True, related_name='attendees')
