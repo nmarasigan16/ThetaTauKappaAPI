@@ -18,8 +18,6 @@ urlpatterns=[
     url(r'^hours/check/(?P<pk>[0-9]+)/$', views.check_reqs),
     url(r'^hours/update/(?P<pku>[0-9]+)/(?P<pke>[0-9]+)/(?P<hours>[0-9]+(\.[0-9]))/$', views.add_event),
 
-    #officer check
-    url(r'^users/check/(?P<pk>[0-9]+)/$', views.check_officer),
 
     #intiate pledges
     url(r'^pledges/initiate/(?P<pk>[0-9]+)/$', views.initiate_pledges),

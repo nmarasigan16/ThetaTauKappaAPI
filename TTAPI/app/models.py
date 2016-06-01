@@ -1,9 +1,13 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.contrib.auth.models import Group, Permission
 
-#to extend the user class of rest_auth app
+#to extend the base user model
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+
+
 
 """
 Chapter class
@@ -214,9 +218,6 @@ class Brother(models.Model):
     gms = models.PositiveIntegerField(default=0)
     attendance_pass = models.CharField(max_length = 50, blank=True)
     excuse = models.TextField(blank=True)
-
-    #officer status
-    officer = models.BooleanField(default=False)
 
 class Hours(models.Model):
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True, related_name='hours')
