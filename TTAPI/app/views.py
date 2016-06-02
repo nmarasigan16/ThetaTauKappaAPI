@@ -40,11 +40,12 @@ import officer_functions, all_functions
 Permissions classes.
 Used to determine whether or not someone is an officer before they can access certain functions
 """
+#TODO MAKE THIS WORK
 class IsOfficer(permissions.BasePermission):
-    def has_object_permission(self, request):
-        if request.method in permission.SAFE_METHODS:
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
             return True
-        return request.user.has_permissions(app.officer)
+        return request.user.has_perm('app.officer')
 
 
 """
