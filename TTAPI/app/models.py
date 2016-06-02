@@ -26,7 +26,7 @@ class Chapter(models.Model):
     chapter_name = models.CharField(max_length=2, choices = CHAPTER_CHOICES, default='K')
     university = models.TextField()
     class Meta:
-        ordering = ['chapter_name']
+        ordering = ['chapter_id']
 
 """
 Meeting class
@@ -62,7 +62,7 @@ Has attributes:
     -create_date (for analytics)
 """
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, null=True)
+    user = models.OneToOneField(User, null=True, related_name='profile')
 
     #custom fields for user
     id = models.AutoField(primary_key=True)

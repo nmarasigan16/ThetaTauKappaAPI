@@ -11,8 +11,9 @@ router.register(r'chapters', views.ChapterViewSet)
 urlpatterns=[
     url(r'^', include(router.urls)),
 
-    #for creation of events and meetings
-    url(r'^events/newEvent/$', views.EventDetailCreate.as_view()),
+    #utility functions (mostly workarounds)
+    url(r'^users/chapter/check/$', views.has_chapter),
+    url(r'^users/chapter/change/(?P<pk>[0-9]+)/$', views.change_chapter),
 
     #all user functions
     url(r'^hours/check/(?P<pk>[0-9]+)/$', views.check_reqs),
@@ -21,11 +22,11 @@ urlpatterns=[
     #officer functions
     url(r'^pledges/initiate/(?P<pk>[0-9]+)/$', views.initiate_pledges),
     #for events
-    url(r'^events/add/$', views.EventDetailCreate),
-    url(r'^events/update/$', views.EventDetailUpdate),
+    url(r'^events/add/$', views.EventDetailCreate.as_view()),
+    url(r'^events/update/$', views.EventDetailUpdate.as_view()),
     #for meetings
-    url(r'^meetings/add/$', views.MeetingDetailCreate),
-    url(r'^meetings/update/$', views.MeetingDetailUpdate),
+    url(r'^meetings/add/$', views.MeetingDetailCreate.as_view()),
+    url(r'^meetings/update/$', views.MeetingDetailUpdate.as_view()),
 
     #admin functions
     url(r'^user/delete/(?P<pk>[0-9]+)/$', views.delete_user),

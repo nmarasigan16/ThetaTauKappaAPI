@@ -35,9 +35,20 @@ class DemographicsSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
+    creator = serializers.PrimaryKeyRelatedField(read_only=True, default = None)
+    chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name', default=None)
     class Meta:
         model = Event
         fields = ('event_id', 'name', 'creator', 'date', 'time', 'duration', 'location', 'about', 'etype', 'chapter')
+
+    def save(self, request):
+        creator = request.user.profile
+        chapter = request.user.profile.chapter_id
+        validated_data = self.validated_data
+        validated_data['creator'] = creator
+        validated_data['chapter'] = chapter
+        event = Event.objects.create(**validated_data)
+        return event
 
 class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,7 +65,7 @@ class BrotherSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = Brother
-        fields = ('user', 'gms', 'attendance_pass', 'excuse', 'officer')
+        fields = ('user', 'gms', 'attendance_pass', 'excuse')
 
 class HourSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -143,10 +154,11 @@ All detail serializers.  Useful to view information
 class UserDetailsSerializer(serializers.Serializer):
 
     user = serializers.SlugRelatedField(read_only=True, slug_field='username', default=None)
+    chapter_id = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name')
     demographics = DemographicsSerializer(read_only=True, default=None)
     hours = HourSerializer(read_only=True, default=None)
     pledge = PledgeSerializer(read_only=True)
     brother = BrotherSerializer(read_only=True)
 
     class Meta:
-        fields = ('user', 'create_date', 'demographics', 'hours', 'brother', 'pledge')
+        fields = ('user', 'chapter_id', 'create_date', 'demographics', 'hours', 'brother', 'pledge')

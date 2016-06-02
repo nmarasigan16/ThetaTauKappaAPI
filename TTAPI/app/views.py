@@ -48,19 +48,10 @@ class IsOfficer(permissions.BasePermission):
 
 
 """
-Temporary functions for testing
-
-These functions are just for testing insertion and deletion from the API
-and will be commented out or deleted once testing is complete
-
-EDIT 5/25:
-    UserViewSet will allow us to view all brothers and thus will not be removed after testing
-    as will Chapter viewset.  It'd probably be a useful feature going forward if this API spreads
-    to other chapters
-
+Viewsets.  Not all are accessible to everyone, see the permission classes
+Allows us to display certain info for people based on serializer user
 """
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminUser,)
     queryset = User.objects.all()
     serializer_class = UserDetailsSerializer
 
@@ -75,6 +66,35 @@ class ChapterViewSet(viewsets.ModelViewSet):
     queryset = Chapter.objects.all()
     serializer_class = ChapterSerializer
 
+"""
+This function is for when we want to add a user to a chapter.  This ideally should happen right after the first
+login by checking if the user has a chapter
+"""
+@api_view(['GET'])
+def has_chapter(request):
+    permission_classes = (IsAuthenticated,)
+    try:
+        chapterless = not (request.user.profile.chapter_id != None)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        return Response({'has_chapter': '%s' % ('False' if chapterless else 'True')}, status=status.HTTP_200_OK)
+
+@api_view(['PUT'])
+def change_chapter(request, pk):
+    permission_classes = (IsAuthenticated,)
+    try:
+        profile = request.user.profile
+        chapter = Chapter.objects.get(pk=pk)
+        profile.chapter_id = chapter
+        profile.save()
+        chapter.save()
+    except Chapter.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        return Response(create_msg_dict('User %s added to Chapter %s' % (profile.demographics.name, chapter.chapter_name)), status = status.HTTP_200_OK)
 
 """
 All Accessible Functions: By brothers and exec
@@ -121,6 +141,20 @@ class EventDetailCreate(generics.CreateAPIView):
     permission_classes = (IsOfficer,)
     queryset = Event.objects.all()
     serializer_class = EventSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        event = self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(create_msg_dict("event created"), status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        event = serializer.save(self.request)
+        return event
+
+
+        return Response(self.get_response_data(user), status=status.HTTP_201_CREATED, headers=headers)
 
 class EventDetailDestroy(generics.DestroyAPIView):
     permission_classes = (IsOfficer,)
@@ -208,11 +242,11 @@ change user officer status
 @return:
     success or failure and the type of operation in a json message
 """
-@api_view(['PUT'])
+@api_view(['GET'])
 def modify_officer_status(request, pk, operation):
     permission_classes=(IsAdminUser,)
     try:
-        user=User.objects.get(pk=pk)
+        user=(User.objects.get(pk=pk)).user
         group = Group.objects.get(name='officers')
         if operation == '1':
             group.user_set.add(user)
@@ -227,8 +261,8 @@ def modify_officer_status(request, pk, operation):
                 status=status.HTTP_400_BAD_REQUEST)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'PUT':
-        return Response(create_msg_dict('Officer status for user %s changed' % user.demographics.name),
+    if request.method == 'GET':
+        return Response(create_msg_dict('Officer status for user %s changed' % user.profile.demographics.name),
                 status=status.HTTP_200_OK)
 
 def create_msg_dict(msg):
