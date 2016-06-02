@@ -214,11 +214,11 @@ def modify_officer_status(request, pk, operation):
     try:
         user=User.objects.get(pk=pk)
         group = Group.objects.get(name='officers')
-        if operation == 1:
+        if operation == '1':
             group.user_set.add(user)
-        elif operation == 0:
+        elif operation == '0':
             group.user_set.remove(user)
-        elif operation == 273:
+        elif operation == '273':
             group.user_set.clear()
         else:
             return Response(create_msg_dict(
