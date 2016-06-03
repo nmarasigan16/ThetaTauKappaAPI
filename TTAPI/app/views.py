@@ -24,6 +24,7 @@ from app.models import UserProfile as User
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.models import User as auth_user
 from django.contrib.contenttypes.models import ContentType
+from app.permissions import IsOfficer
 
 #external files
 import officer_functions, all_functions
@@ -35,37 +36,29 @@ if created:
     group.permissions.add(permission)
 
 """
-Permissions classes.
-Used to determine whether or not someone is an officer before they can access certain functions
-"""
-#TODO MAKE THIS WORK
-class IsOfficer(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return request.user.has_perm('app.officer')
-
-
-"""
 Viewsets.  Not all are accessible to everyone, see the permission classes
 Allows us to display certain info for people based on serializer user
 """
 class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminUser,)
     queryset = User.objects.all()
     serializer_class = UserDetailsSerializer
 
 class DemographicsViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = Demographics.objects.all()
     serializer_class = DemographicsSerializer
 
 
 class ChapterViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAdminUser,)
     queryset = Chapter.objects.all()
     serializer_class = ChapterSerializer
 
-
+class EventViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsOfficer,)
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
 
 """
 This function is for when we want to add a user to a chapter.  This ideally should happen right after the first
