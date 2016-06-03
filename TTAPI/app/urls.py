@@ -7,7 +7,7 @@ router = DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'demographics', views.DemographicsViewSet)
 router.register(r'chapters', views.ChapterViewSet)
-router.register(r'events', views.EventViewSet)
+router.register(r'events/edit', views.EventViewSet)
 
 urlpatterns=[
     url(r'^', include(router.urls)),

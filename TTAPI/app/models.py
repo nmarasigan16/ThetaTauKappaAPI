@@ -123,8 +123,6 @@ class Demographics(models.Model):
 
     name = models.CharField(max_length = 50)
 
-    email = models.EmailField(null=True)
-
     #TODO add phone number regex
 
     YEAR_IN_SCHOOL_CHOICES = [
