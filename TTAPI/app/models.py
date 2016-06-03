@@ -8,7 +8,6 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 
 
-
 """
 Chapter class
 
@@ -74,6 +73,9 @@ class UserProfile(models.Model):
 
     class Meta:
         ordering = ['chapter_id']
+        permissions =(
+                ('officer', 'Is an officer'),
+            )
 
 """
 Event class

@@ -12,8 +12,8 @@ urlpatterns=[
     url(r'^', include(router.urls)),
 
     #utility functions (mostly workarounds)
-    url(r'^users/chapter/check/$', views.has_chapter),
-    url(r'^users/chapter/change/(?P<pk>[0-9]+)/$', views.change_chapter),
+    url(r'^user/chapter/check/$', views.has_chapter),
+    url(r'^user/chapter/change/(?P<pk>[0-9]+)/$', views.change_chapter),
 
     #all user functions
     url(r'^hours/check/(?P<pk>[0-9]+)/$', views.check_reqs),

@@ -25,16 +25,14 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.models import User as auth_user
 from django.contrib.contenttypes.models import ContentType
 
-content_type = ContentType.objects.get_for_model(auth_user)
-permission = Permission.objects.get_or_create(codename='officer', name='Is an officer', content_type=content_type)
-group, created = Group.objects.get_or_create(name='officers')
-if created:
-    group.permissions.add(permission)
-
 #external files
 import officer_functions, all_functions
 
-#TODO import functions from other files
+
+permission = Permission.objects.get(codename='officer')
+group, created = Group.objects.get_or_create(name='officers')
+if created:
+    group.permissions.add(permission)
 
 """
 Permissions classes.
@@ -66,6 +64,8 @@ class ChapterViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Chapter.objects.all()
     serializer_class = ChapterSerializer
+
+
 
 """
 This function is for when we want to add a user to a chapter.  This ideally should happen right after the first
