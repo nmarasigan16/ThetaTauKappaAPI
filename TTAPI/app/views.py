@@ -40,7 +40,7 @@ Viewsets.  Not all are accessible to everyone, see the permission classes
 Allows us to display certain info for people based on serializer user
 """
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserDetailsSerializer
 

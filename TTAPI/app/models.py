@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import Group, Permission
+from django.core.validators import RegexValidator
 
 #to extend the base user model
 from django.contrib.auth.models import User
@@ -114,6 +115,7 @@ Class for demographics.  Holds contact info
 Made partially out of laziness, and also partially to abstract passwords and ids from users
 Has attributes:
     -name
+    -phone number
     -year in school
     -major
     -current status
@@ -123,7 +125,8 @@ class Demographics(models.Model):
 
     name = models.CharField(max_length = 50)
 
-    #TODO add phone number regex
+    phone_validator = RegexValidator(regex=r'^[0-9]{9,15}$', message="Phone number needs to be in format 123456789, up to 15 characters accepted")
+    phone_number = models.CharField(validators=[phone_validator], max_length=15, blank=True)
 
     YEAR_IN_SCHOOL_CHOICES = [
             ('FR', 'Freshman'),

@@ -15,11 +15,6 @@ except ImportError:
     raise ImportError('allauth needs to be added to INSTALLED_APPS.')
 
 
-#for rest_auth user
-
-#TODO make create methods for user that automatically spawns a demographics object, and make a
-#create method for demographics that automatically creates either a pledge or brother object
-
 
 class ChapterSerializer(serializers.ModelSerializer):
     members = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='userprofile-detail')
@@ -31,7 +26,7 @@ class DemographicsSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=None, required=False)
     class Meta:
         model = Demographics
-        fields = ('user', 'name',  'major', 'status', 'city')
+        fields = ('user', 'name',  'phone_number', 'major', 'status', 'city')
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -146,7 +141,8 @@ class UserDetailsSerializer(serializers.Serializer):
 
     name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='user.profile.demographics')
     email = serializers.SlugRelatedField(read_only=True, slug_field='email', source='user')
+    phone_number = serializers.SlugRelatedField(read_only=True, slug_field='phone_number', source='demographics')
     chapter_id = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name')
 
     class Meta:
-        fields = ('name', 'email', 'chapter_id')
+        fields = ('name', 'email', 'phone_number', 'chapter_id')
