@@ -58,7 +58,7 @@ Class for a user
 Has attributes:
     -user (to extend the rest_auth user)
     -id (to identify user)
-    -chapter_id (foreign key)
+    -chapter (foreign key)
     -create_date (for analytics)
 """
 class UserProfile(models.Model):
@@ -68,7 +68,7 @@ class UserProfile(models.Model):
     id = models.AutoField(primary_key=True)
 
     #for which chapter user belongs to
-    chapter_id = models.ForeignKey(Chapter, on_delete=models.CASCADE, related_name='members', null=True)
+    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE, related_name='members', null=True)
 
     create_date = models.DateField(auto_now_add=True)
 

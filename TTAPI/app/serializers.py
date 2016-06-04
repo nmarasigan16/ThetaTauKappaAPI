@@ -38,7 +38,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     def save(self, request):
         creator = request.user.profile
-        chapter = request.user.profile.chapter_id
+        chapter = request.user.profile.chapter
         validated_data = self.validated_data
         validated_data['creator'] = creator
         validated_data['chapter'] = chapter
@@ -72,10 +72,10 @@ class HourSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(read_only=True, slug_field='email', default=None)
-    chapter_id = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name', default=None)
+    chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name', default=None)
     class Meta:
         model=User
-        fields = ('user', 'id', 'chapter_id')
+        fields = ('user', 'id', 'chapter')
 
 #overwrites register serializer so that way it spins off a user instance with all the proper things
 
@@ -142,7 +142,11 @@ class UserDetailsSerializer(serializers.Serializer):
     name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='user.profile.demographics')
     email = serializers.SlugRelatedField(read_only=True, slug_field='email', source='user')
     phone_number = serializers.SlugRelatedField(read_only=True, slug_field='phone_number', source='demographics')
-    chapter_id = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name')
+    chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name')
 
     class Meta:
-        fields = ('name', 'email', 'phone_number', 'chapter_id')
+        fields = ('name', 'email', 'phone_number', 'chapter')
+
+class EventDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('name', 'date', 'time', 'location', 'about', 'etype')

@@ -4,10 +4,16 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'demographics', views.DemographicsViewSet)
-router.register(r'chapters', views.ChapterViewSet)
-router.register(r'events/edit', views.EventViewSet)
+#authenticated users urls
+router.register(r'users', views.UserDetailViewSet)
+router.register(r'events', views.EventDetailViewSet)
+#Officer only urls
+router.register(r'events/full', views.EventViewSet)
+router.register(r'meetings/full', views.MeetingViewSet)
+#admin only urls
+router.register(r'demographics/full', views.DemographicsViewSet)
+router.register(r'chapters/full', views.ChapterViewSet)
+router.register(r'users/full', views.UserViewSet)
 
 urlpatterns=[
     url(r'^', include(router.urls)),
@@ -22,12 +28,6 @@ urlpatterns=[
 
     #officer functions
     url(r'^pledges/initiate/(?P<pk>[0-9]+)/$', views.initiate_pledges),
-    #for events
-    url(r'^events/add/$', views.EventDetailCreate.as_view()),
-    url(r'^events/update/$', views.EventDetailUpdate.as_view()),
-    #for meetings
-    url(r'^meetings/add/$', views.MeetingDetailCreate.as_view()),
-    url(r'^meetings/update/$', views.MeetingDetailUpdate.as_view()),
 
     #admin functions
     url(r'^user/delete/(?P<pk>[0-9]+)/$', views.delete_user),

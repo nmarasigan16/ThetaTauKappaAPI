@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from app.serializers import (
         UserSerializer, ChapterSerializer, DemographicsSerializer,
         EventSerializer, MeetingSerializer, PledgeSerializer,
-        BrotherSerializer, UserDetailsSerializer
+        BrotherSerializer, UserDetailsSerializer, EventDetailsSerializer,
         )
 from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics
 from app.models import UserProfile as User
@@ -36,29 +36,20 @@ if created:
     group.permissions.add(permission)
 
 """
-Viewsets.  Not all are accessible to everyone, see the permission classes
-Allows us to display certain info for people based on serializer user
+Viewsets for authenticated users.  Displays all of the relevent details of an event
+for users to look at
 """
-class UserViewSet(viewsets.ModelViewSet):
+class UserDetailViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
-    queryset = User.objects.all()
     serializer_class = UserDetailsSerializer
+    def get_queryset(self):
+        return User.objects.filter(chapter = request.user.profile.chapter)
+class EventDetailViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = EventDetailsSerializer
+    def get_queryset(self):
+        return Event.objects.filter(chapter = request.user.profile.chapter)
 
-class DemographicsViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminUser,)
-    queryset = Demographics.objects.all()
-    serializer_class = DemographicsSerializer
-
-
-class ChapterViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAdminUser,)
-    queryset = Chapter.objects.all()
-    serializer_class = ChapterSerializer
-
-class EventViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsOfficer,)
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
 
 """
 This function is for when we want to add a user to a chapter.  This ideally should happen right after the first
@@ -68,7 +59,7 @@ login by checking if the user has a chapter
 def has_chapter(request):
     permission_classes = (IsAuthenticated,)
     try:
-        chapterless = not (request.user.profile.chapter_id != None)
+        chapterless = not (request.user.profile.chapter != None)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -81,7 +72,7 @@ def change_chapter(request, pk):
     try:
         profile = request.user.profile
         chapter = Chapter.objects.get(pk=pk)
-        profile.chapter_id = chapter
+        profile.chapter = chapter
         profile.save()
         chapter.save()
     except Chapter.DoesNotExist:
@@ -128,54 +119,14 @@ Officer only functions:
 - Initiate pledges
 """
 
-"""
-This view is for posting events
-"""
-class EventDetailCreate(generics.CreateAPIView):
+class EventViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOfficer,)
     queryset = Event.objects.all()
     serializer_class = EventSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        event = self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(create_msg_dict("event created"), status=status.HTTP_201_CREATED, headers=headers)
-
-    def perform_create(self, serializer):
-        event = serializer.save(self.request)
-        return event
-
-
-        return Response(self.get_response_data(user), status=status.HTTP_201_CREATED, headers=headers)
-
-class EventDetailDestroy(generics.DestroyAPIView):
+class MeetingViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOfficer,)
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
-
-class EventDetailUpdate(generics.RetrieveUpdateAPIView):
-    permission_classes = (IsOfficer,)
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
-"""
-This is for meetings
-Same note as events
-"""
-class MeetingDetailCreate(generics.CreateAPIView):
-    permission_classes= (IsOfficer,)
-    queryset = Event.objects.all()
-    serializer_class = MeetingSerializer
-
-class MeetingDetailUpdate(generics.RetrieveUpdateAPIView):
-    permission_classes = (IsOfficer,)
-    queryset = Meeting.objects.all()
-    serializer_class = MeetingSerializer
-
-class MeetingDetailDestroy(generics.DestroyAPIView):
-    permission_classes = (IsOfficer,)
-    queryset = Meeting.objects.all()
+    queryset= Meeting.objects.all()
     serializer_class = MeetingSerializer
 
 """
@@ -183,7 +134,7 @@ class MeetingDetailDestroy(generics.DestroyAPIView):
 Actually deletes their pledge instance with their pledge requirements
 and replaces it with a new brother instance
 @param:
-    chapter_id of the chapter whose pledges we want to initiate
+    chapter of the chapter whose pledges we want to initiate
 @return:
     response indicating status
 """
@@ -201,11 +152,26 @@ def initiate_pledges(request, pk):
         return Response(create_msg_dict("Pledges for " + chapter.chapter_name + " intiated"), status=status.HTTP_200_OK)
 
 """
-Admin only functions
+Admin only functions and viewsets
 Only those that have the .is_staff in their
 Django user can access these functions
 """
 
+class DemographicsViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminUser,)
+    queryset = Demographics.objects.all()
+    serializer_class = DemographicsSerializer
+
+
+class ChapterViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminUser,)
+    queryset = Chapter.objects.all()
+    serializer_class = ChapterSerializer
+
+class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAdminUser,)
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 """
 Delete user function
