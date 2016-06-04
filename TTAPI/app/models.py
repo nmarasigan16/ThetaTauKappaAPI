@@ -231,6 +231,9 @@ class Hours(models.Model):
     events = models.ManyToManyField(Event, blank = True, related_name='attendees')
     meetings = models.ManyToManyField(Meeting, blank = True, related_name='attendees')
 
+    def __unicode__(self):
+        return '%s : %s' % (self.user.demographics.name, self.user.user.email)
+
 class Attendance(models.Model):
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True, related_name='attendance')
     password = models.CharField(max_length = 50, blank=True)

@@ -39,7 +39,7 @@ Adds hours to user and adds user to event
 """
 def adder(user, event, h):
     hours = float(h)
-    if hours == -1:
+    if hours == 0.0:
         hours = event.duration
 
     if event.etype == 'PR':
@@ -49,9 +49,8 @@ def adder(user, event, h):
     if event.etype == 'PH':
         user.hours.philanthropy += hours
 
+    user.hours.events.add(event)
     user.hours.save()
-    user.demographics.events.add(event)
-    user.demographics.save()
     return True
 
 

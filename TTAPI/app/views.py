@@ -93,6 +93,10 @@ class InterviewDetailList(generics.ListAPIView):
 """
 This function is for when we want to add a user to a chapter.  This ideally should happen right after the first
 login by checking if the user has a chapter
+@param:
+    a request
+@return:
+    a json message that gives the chapter status of the user
 """
 @api_view(['GET'])
 def has_chapter(request):
@@ -103,21 +107,28 @@ def has_chapter(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        return Response({'has_chapter': '%s' % ('False' if chapterless else 'True')}, status=status.HTTP_200_OK)
+        return Response({'has_chapter': '%b' % (False if chapterless else True)}, status=status.HTTP_200_OK)
 
+"""
+Function to change the chapter of the current user
+@param:
+    primary key of a chapter object to assign user to
+@return:
+    response indicating if successful
+"""
 @api_view(['PUT'])
 def change_chapter(request, pk):
     permission_classes = (IsAuthenticated,)
     try:
         profile = request.user.profile
         chapter = Chapter.objects.get(pk=pk)
-        profile.chapter = chapter
-        profile.save()
-        chapter.save()
     except Chapter.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'PUT':
+        profile.chapter = chapter
+        profile.save()
+        chapter.save()
         return Response(create_msg_dict('User %s added to Chapter %s' % (profile.demographics.name, chapter.chapter_name)), status = status.HTTP_200_OK)
 
 """
@@ -149,7 +160,7 @@ def add_event(request, pke, hours):
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'PUT':
         outcome = all_functions.adder(user, event, hours)
-        return Response(create_msg_dict(create_msg_dict("Event %s added for user %s" % (event.name, user.email))), status=status.HTTP_200_OK)
+        return Response(create_msg_dict(create_msg_dict("Event %s added for user %s" % (event.name, user.demographics.name))), status=status.HTTP_200_OK)
 
 @api_view(['GET', 'PUT'])
 def edit_interview(request, pk):

@@ -45,21 +45,6 @@ class DemographicsSerializer(serializers.ModelSerializer):
         fields = ('user', 'name',  'phone_number', 'major', 'status', 'city')
 
 
-class EventSerializer(serializers.ModelSerializer):
-    creator = serializers.PrimaryKeyRelatedField(read_only=True, default = None)
-    chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name', default=None)
-    class Meta:
-        model = Event
-        fields = ('event_id', 'name', 'creator', 'date', 'time', 'duration', 'location', 'about', 'etype', 'chapter')
-
-    def save(self, request):
-        creator = request.user.profile
-        chapter = request.user.profile.chapter
-        validated_data = self.validated_data
-        validated_data['creator'] = creator
-        validated_data['chapter'] = chapter
-        event = Event.objects.create(**validated_data)
-        return event
 
 class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -174,3 +159,20 @@ class EventDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('event_id', 'name', 'date', 'time', 'location', 'about', 'etype')
+
+class EventSerializer(serializers.ModelSerializer):
+    creator = UserDetailsSerializer(read_only=True, default = None)
+    chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name', default=None)
+    attendees = serializers.StringRelatedField(many=True)
+    class Meta:
+        model = Event
+        fields = ('event_id', 'name', 'creator', 'date', 'time', 'duration', 'location', 'about', 'etype', 'chapter', 'attendees')
+
+    def save(self, request):
+        creator = request.user.profile
+        chapter = request.user.profile.chapter
+        validated_data = self.validated_data
+        validated_data['creator'] = creator
+        validated_data['chapter'] = chapter
+        event = Event.objects.create(**validated_data)
+        return event
