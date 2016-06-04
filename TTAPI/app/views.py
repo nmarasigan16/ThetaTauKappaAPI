@@ -92,28 +92,44 @@ All Accessible Functions: By brothers and exec
 - add signatures (pledges only)
 """
 @api_view(['GET'])
-def check_reqs(request, pk):
+def check_reqs(request):
     permission_classes = (IsAuthenticated,)
     try:
-        user = User.objects.objects.get(pk=pk)
+        user = request.user.profile
         reqs = all_functions.format_reqs(user)
-    except User.DoesNotExist:
+    except user.profile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request == 'GET':
         return Response(reqs)
 
 @api_view(['PUT'])
-def add_event(request, pku, pke, hours):
+def add_event(request, pke, hours):
     permission_classes = (IsAuthenticated,)
     if request.method == 'PUT':
         try:
-            user = User.objects.get(pk = pku)
+            user = request.user.profile
             event = Event.objects.get(pk = pke)
             outcome = all_functions.adder(user, event, hours)
-        except User.DoesNotExist or Event.DoesNotExist:
+        except user.profile.DoesNotExist or Event.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 #TODO make object permissions for attendance and write attendance view
+@api_view(['GET', 'PUT'])
+def attendance_detail(request):
+    try:
+        attendance = Attendance.objects.get(user=request.user.profile)
+    except Attendance.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        serializer = AttendanceSerializer(attendance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    elif request.method == 'PUT':
+        serializer = AttendanceSerializer(attendance, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 """
