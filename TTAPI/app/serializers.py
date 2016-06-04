@@ -158,4 +158,5 @@ class UserDetailsSerializer(serializers.Serializer):
 
 class EventDetailsSerializer(serializers.ModelSerializer):
     class Meta:
+        model = Event
         fields = ('name', 'date', 'time', 'location', 'about', 'etype')

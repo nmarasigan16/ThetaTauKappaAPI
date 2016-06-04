@@ -16,8 +16,9 @@ from app.serializers import (
         UserSerializer, ChapterSerializer, DemographicsSerializer,
         EventSerializer, MeetingSerializer, PledgeSerializer,
         BrotherSerializer, UserDetailsSerializer, EventDetailsSerializer,
+        AttendanceSerializer
         )
-from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics
+from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Attendance
 from app.models import UserProfile as User
 
 #for permissions
@@ -116,6 +117,7 @@ def add_event(request, pke, hours):
 #TODO make object permissions for attendance and write attendance view
 @api_view(['GET', 'PUT'])
 def attendance_detail(request):
+    permission_classes = (IsAuthenticated,)
     try:
         attendance = Attendance.objects.get(user=request.user.profile)
     except Attendance.DoesNotExist:
@@ -144,6 +146,16 @@ class EventViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOfficer,)
     queryset = Event.objects.all()
     serializer_class = EventSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        event = self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(create_msg_dict("event created"), status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        event = serializer.save(self.request)
+        return event
 
 class MeetingViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOfficer,)

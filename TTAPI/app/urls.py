@@ -25,6 +25,7 @@ urlpatterns=[
     #all user functions
     url(r'^hours/check/(?P<pk>[0-9]+)/$', views.check_reqs),
     url(r'^hours/update/(?P<pke>[0-9]+)/(?P<hours>(?:[1-9]\d*|0)?(?:\.5*)?)/$', views.add_event),
+    url(r'^attendance/update/$', views.attendance_detail),
 
     #officer functions
     url(r'^pledges/initiate/(?P<pk>[0-9]+)/$', views.initiate_pledges),
