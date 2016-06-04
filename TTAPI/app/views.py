@@ -17,16 +17,16 @@ from app.serializers import (
         UserSerializer, ChapterSerializer, DemographicsSerializer,
         EventSerializer, MeetingSerializer, PledgeSerializer,
         BrotherSerializer, UserDetailsSerializer, EventDetailsSerializer,
-        AttendanceSerializer
+        AttendanceSerializer, InterviewSerializer
         )
-from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Attendance
+from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Attendance, Interview
 from app.models import UserProfile as User
 
 #for permissions
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.models import User as auth_user
 from django.contrib.contenttypes.models import ContentType
-from app.permissions import IsOfficer
+from app.permissions import IsOfficer, ReadOnly, IsPledge
 
 #external files
 import officer_functions, all_functions
@@ -38,21 +38,56 @@ if created:
     group.permissions.add(permission)
 
 """
+A List of Functions that are included
+
+-Finished Functions(need more extensive testing):
+    -Viewset for users to lookup other brothers(in their chapter)
+    -Viewset for events for users to lookup events(in their chapter)
+    -A test for if a user has a chapter
+    -A function to change the chapter of the user
+    -Add an event
+    -Input a password or excuse for attendance
+    -Pledge initiation
+    -Delete user
+    -Modify user officer status
+
+-TODO Functions
+    -Take attendance for a gm
+    -Allow interviews to be input and processed
+    -send emails to all users
+    -edit user profile
+
+"""
+
+
+
+"""
 Viewsets for authenticated users.  Displays all of the relevent details of an event
 for users to look at
 """
+#Viewset for finding other brothers
 class UserDetailList(generics.ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (ReadOnly,)
     serializer_class = UserDetailsSerializer
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(chapter = user.profile.chapter)
+
+#viewset for events
 class EventDetailList(generics.ListAPIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (ReadOnly,)
     serializer_class = EventDetailsSerializer
     def get_queryset(self):
         user = self.request.user
         return Event.objects.filter(chapter = user.profile.chapter)
+
+#viewset for
+class InterviewDetailList(generics.ListAPIView):
+    permission_classes = (IsAuthenticated, IsPledge)
+    serializer_class = InterviewSerializer
+    def get_queryset(self):
+        pledge = self.request.user.profile.pledge
+        return Interview.objects.filter(pledge=pledge)
 
 
 """
@@ -98,26 +133,61 @@ def check_reqs(request):
     permission_classes = (IsAuthenticated,)
     try:
         user = request.user.profile
-        reqs = all_functions.format_reqs(user)
     except user.profile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request == 'GET':
+        reqs = all_functions.format_reqs(user)
         return Response(reqs)
 
 @api_view(['PUT'])
 def add_event(request, pke, hours):
     permission_classes = (IsAuthenticated,)
+    try:
+        user = request.user.profile
+        event = Event.objects.get(pk = pke)
+    except user.profile.DoesNotExist or Event.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'PUT':
-        try:
-            user = request.user.profile
-            event = Event.objects.get(pk = pke)
-            outcome = all_functions.adder(user, event, hours)
-        except user.profile.DoesNotExist or Event.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        outcome = all_functions.adder(user, event, hours)
+        return Response(create_msg_dict(create_msg_dict("Event %s added for user %s" % (event.name, user.email))), status=status.HTTP_200_OK)
 
-#TODO make object permissions for attendance and write attendance view
+@api_view(['GET', 'PUT'])
+def edit_interview(request, pk):
+    permission_classes = (IsPledge, IsOwner,)
+    def get_object(self, pk):
+        try:
+            return Interview.objects.get(pk=pk)
+        except Interview.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        interview = get_object(pk)
+        serializer = InterviewSerializer(interview)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format = None):
+        interview = get_object(pk)
+        serializer = InterviewSerializer(interview, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LogInterview(generics.CreateAPIView):
+    permission_classes = (IsPledge,)
+    queryset = Interview.objects.all()
+    serializer_class = InterviewSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        interview = self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(create_msg_dict("Interview logged"), status=status.HTTP_201_CREATED, headers=headers)
+    def perform_create(self, serializer):
+        interview = serializer.save(self.request)
+        return interview
+
 class AttendanceDetail(APIView):
-#TODO make permission class to only allow it to be edited by the owner or officer
     permission_classes = (IsAuthenticated,)
     def get_object(self, user):
         try:
@@ -177,14 +247,13 @@ and replaces it with a new brother instance
 @api_view(['PUT'])
 def initiate_pledges(request, pk):
     permission_classes=(IsOfficer,)
+    try:
+        chapter = Chapter.objects.get(pk=pk)
+    except Chapter.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'PUT':
-        try:
-            chapter = Chapter.objects.get(pk=pk)
-            members = chapter.members.all()
-            officer_functions.initiate(members)
-        except Chapter.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        members = chapter.members.all()
+        officer_functions.initiate(members)
         return Response(create_msg_dict("Pledges for " + chapter.chapter_name + " intiated"), status=status.HTTP_200_OK)
 
 """
@@ -220,13 +289,12 @@ Delete user function
 @api_view(['DELETE'])
 def delete_user(request, pk):
     permission_classes=(IsAdminUser,)
+    try:
+        user = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'DELETE':
-        try:
-            user = User.objects.get(pk=pk)
-            user.delete()
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
+        user.delete()
         return Response(create_msg_dict("User deleted"), status=status.HTTP_200_OK)
 
 

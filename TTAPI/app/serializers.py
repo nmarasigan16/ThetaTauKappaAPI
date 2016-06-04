@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Hours, Attendance
+from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Hours, Attendance, Interview
 from app.models import UserProfile as User
 from django.http import HttpRequest
 from django.conf import settings
@@ -13,6 +13,19 @@ try:
     from allauth.account.utils import setup_user_email
 except ImportError:
     raise ImportError('allauth needs to be added to INSTALLED_APPS.')
+
+class InterviewSerializer(serializers.ModelSerializer):
+    pledge = serializers.PrimaryKeyRelatedField(read_only=True, default = None)
+    class Meta:
+        model = Interview
+        fields = ('interview_id', 'pledge', 'brother', 'description')
+
+    def save(self, request):
+        pledge = request.user.profile.pledge
+        validated_data = self.validated_data
+        validated_data['pledge'] = pledge
+        interview = Interview.objects.create(**validated_data)
+        return interview
 
 class AttendanceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -55,9 +68,10 @@ class MeetingSerializer(serializers.ModelSerializer):
 
 class PledgeSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
+    interviews = InterviewSerializer(many=True)
     class Meta:
         model = Pledge
-        fields = ('user', 'family', 'brother', 'pledge')
+        fields = ('user', 'family', 'brother', 'pledge', 'interviews')
 
 class BrotherSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -118,7 +132,7 @@ class RegisterSerializer(serializers.Serializer):
         Hours.objects.create(user=profile)
         Attendance.objects.create(user=profile)
         if d_data['status'] == 'P':
-            Pledge.objects.create(user=profile)
+            pledge = Pledge.objects.create(user=profile)
         elif d_data['status'] == 'B':
             Brother.objects.create(user=profile)
 
@@ -159,4 +173,4 @@ class UserDetailsSerializer(serializers.Serializer):
 class EventDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ('name', 'date', 'time', 'location', 'about', 'etype')
+        fields = ('event_id', 'name', 'date', 'time', 'location', 'about', 'etype')

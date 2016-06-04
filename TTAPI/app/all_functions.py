@@ -52,7 +52,7 @@ def adder(user, event, h):
     user.hours.save()
     user.demographics.events.add(event)
     user.demographics.save()
-
+    return True
 
 
 
