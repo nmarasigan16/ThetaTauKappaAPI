@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from django.core import serializers
+from django.http import Http404
 
 #auth stuff
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
@@ -115,23 +116,25 @@ def add_event(request, pke, hours):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 #TODO make object permissions for attendance and write attendance view
-@api_view(['GET', 'PUT'])
-def attendance_detail(request):
+class AttendanceDetail(APIView):
+#TODO make permission class to only allow it to be edited by the owner or officer
     permission_classes = (IsAuthenticated,)
-    try:
-        attendance = Attendance.objects.get(user=request.user.profile)
-    except Attendance.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
+    def get_object(self, user):
+        try:
+            return Attendance.objects.get(user=user)
+        except Attendance.DoesNotExist:
+            raise Http404
+    def get(self, request, format=None):
+        attendance = self.get_object(request.user.profile)
         serializer = AttendanceSerializer(attendance)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == 'PUT':
+        return Response(serializer.data)
+    def put(self, request, format=None):
+        attendance=self.get_object(request.user.profile)
         serializer = AttendanceSerializer(attendance, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 """
