@@ -43,12 +43,14 @@ class UserDetailViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserDetailsSerializer
     def get_queryset(self):
-        return User.objects.filter(chapter = request.user.profile.chapter)
+        user = self.request.user
+        return User.objects.filter(chapter = user.profile.chapter)
 class EventDetailViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = EventDetailsSerializer
     def get_queryset(self):
-        return Event.objects.filter(chapter = request.user.profile.chapter)
+        user = self.request.user
+        return Event.objects.filter(chapter = user.profile.chapter)
 
 
 """
