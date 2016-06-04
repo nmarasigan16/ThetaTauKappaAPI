@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Hours
+from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Hours, Attendance
 from app.models import UserProfile as User
 from django.http import HttpRequest
 from django.conf import settings
@@ -14,7 +14,10 @@ try:
 except ImportError:
     raise ImportError('allauth needs to be added to INSTALLED_APPS.')
 
-
+class AttendanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attendance
+        fields = ('password', 'excuse')
 
 class ChapterSerializer(serializers.ModelSerializer):
     members = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='userprofile-detail')
@@ -60,7 +63,7 @@ class BrotherSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = Brother
-        fields = ('user', 'gms', 'attendance_pass', 'excuse')
+        fields = ('user', 'gms')
 
 class HourSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -73,9 +76,14 @@ class HourSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(read_only=True, slug_field='email', default=None)
     chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name', default=None)
+    demographics = DemographicsSerializer()
+    brother = BrotherSerializer()
+    pledge = PledgeSerializer()
+    attendance = AttendanceSerializer()
+
     class Meta:
         model=User
-        fields = ('user', 'id', 'chapter')
+        fields = ('user', 'id', 'chapter', 'demographics', 'brother', 'pledge', 'attendance')
 
 #overwrites register serializer so that way it spins off a user instance with all the proper things
 
@@ -108,6 +116,7 @@ class RegisterSerializer(serializers.Serializer):
         d_data['user']=profile
         Demographics.objects.create(**d_data)
         Hours.objects.create(user=profile)
+        Attendance.objects.create(user=profile)
         if d_data['status'] == 'P':
             Pledge.objects.create(user=profile)
         elif d_data['status'] == 'B':

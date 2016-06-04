@@ -215,13 +215,12 @@ Gives additional attributes:
 class Brother(models.Model):
     #extends user class
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True, related_name='brother')
-
-
     #gm stuff
     gms = models.PositiveIntegerField(default=0)
-    attendance_pass = models.CharField(max_length = 50, blank=True)
-    excuse = models.TextField(blank=True)
-
+"""
+Class for hours
+Used to log attendance for all brothers
+"""
 class Hours(models.Model):
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True, related_name='hours')
 
@@ -231,3 +230,9 @@ class Hours(models.Model):
     professional = models.FloatField(default=0)
     events = models.ManyToManyField(Event, blank = True, related_name='attendees')
     meetings = models.ManyToManyField(Meeting, blank = True, related_name='attendees')
+
+class Attendance(models.Model):
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True, related_name='attendance')
+    password = models.CharField(max_length = 50, blank=True)
+    excuse = models.TextField(blank=True)
+

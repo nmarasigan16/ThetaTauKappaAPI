@@ -4,9 +4,6 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-#authenticated users urls
-router.register(r'users', views.UserDetailViewSet, base_name='user-detail')
-router.register(r'events', views.EventDetailViewSet, base_name='event-detail')
 #Officer only urls
 router.register(r'events/full', views.EventViewSet)
 router.register(r'meetings/full', views.MeetingViewSet)
@@ -17,6 +14,9 @@ router.register(r'users/full', views.UserViewSet)
 
 urlpatterns=[
     url(r'^', include(router.urls)),
+
+    url(r'^users/$', views.UserDetailList.as_view()),
+    url(r'^events/$', views.EventDetailList.as_view()),
 
     #utility functions (mostly workarounds)
     url(r'^user/chapter/check/$', views.has_chapter),

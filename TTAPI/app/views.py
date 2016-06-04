@@ -39,13 +39,13 @@ if created:
 Viewsets for authenticated users.  Displays all of the relevent details of an event
 for users to look at
 """
-class UserDetailViewSet(viewsets.ModelViewSet):
+class UserDetailList(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserDetailsSerializer
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(chapter = user.profile.chapter)
-class EventDetailViewSet(viewsets.ModelViewSet):
+class EventDetailList(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = EventDetailsSerializer
     def get_queryset(self):
@@ -112,6 +112,9 @@ def add_event(request, pku, pke, hours):
             outcome = all_functions.adder(user, event, hours)
         except User.DoesNotExist or Event.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+#TODO make object permissions for attendance and write attendance view
+
 
 """
 Officer only functions:
