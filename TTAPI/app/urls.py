@@ -5,8 +5,8 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 #authenticated users urls
-router.register(r'users', views.UserDetailViewSet)
-router.register(r'events', views.EventDetailViewSet)
+router.register(r'users', views.UserDetailViewSet, base_name='user-detail')
+router.register(r'events', views.EventDetailViewSet, base_name='event-detail')
 #Officer only urls
 router.register(r'events/full', views.EventViewSet)
 router.register(r'meetings/full', views.MeetingViewSet)
