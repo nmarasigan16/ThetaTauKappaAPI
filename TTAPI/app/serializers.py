@@ -28,9 +28,10 @@ class InterviewSerializer(serializers.ModelSerializer):
         return interview
 
 class AttendanceSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
     class Meta:
         model = Attendance
-        fields = ('password', 'excuse')
+        fields = ('user', 'password', 'excuse')
 
 class ChapterSerializer(serializers.ModelSerializer):
     members = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='userprofile-detail')
@@ -47,9 +48,17 @@ class DemographicsSerializer(serializers.ModelSerializer):
 
 
 class MeetingSerializer(serializers.ModelSerializer):
+    chapter = serializers.SlugRelatedField(read_only=True, required=False, slug_field = 'chapter_name')
+    attendees = serializers.StringRelatedField(many=True)
     class Meta:
         model = Meeting
-        fields = ('meeting_id', 'password', 'mtype', 'date', 'chapter')
+        fields = ('meeting_id', 'password', 'mtype', 'date', 'chapter', 'attendees')
+    def save(self, request):
+        chapter = request.user.profile.chapter
+        validated_data = self.validated_data
+        validated_data['chapter'] = chapter
+        meeting = Meeting.objects.create(**validated_data)
+        return meeting
 
 class PledgeSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -79,10 +88,11 @@ class UserSerializer(serializers.ModelSerializer):
     brother = BrotherSerializer()
     pledge = PledgeSerializer()
     attendance = AttendanceSerializer()
+    hours = HourSerializer()
 
     class Meta:
         model=User
-        fields = ('user', 'id', 'chapter', 'demographics', 'brother', 'pledge', 'attendance')
+        fields = ('user', 'id', 'chapter', 'demographics', 'brother', 'pledge', 'attendance', 'hours')
 
 #overwrites register serializer so that way it spins off a user instance with all the proper things
 
@@ -148,9 +158,10 @@ All detail serializers.  Useful to view information
 class UserDetailsSerializer(serializers.Serializer):
 
     name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='user.profile.demographics')
-    email = serializers.SlugRelatedField(read_only=True, slug_field='email', source='user')
+    email = serializers.SlugRelatedField(slug_field='email', source='user', read_only=True)
     phone_number = serializers.SlugRelatedField(read_only=True, slug_field='phone_number', source='demographics')
     chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name')
+    city = serializers.SlugRelatedField(slug_field='city', source='demographics', read_only=True)
 
     class Meta:
         fields = ('name', 'email', 'phone_number', 'chapter')

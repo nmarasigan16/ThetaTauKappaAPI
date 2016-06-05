@@ -33,7 +33,8 @@ urlpatterns=[
     url(r'^interviews/log/$', views.LogInterview.as_view()),
 
     #officer functions
-    url(r'^pledges/initiate/(?P<pk>[0-9]+)/$', views.initiate_pledges),
+    url(r'^pledges/initiate/$', views.initiate_pledges),
+    url(r'^attendance/(?P<pk>[0-9]+)/$', views.TakeAttendance.as_view()),
 
     #admin functions
     url(r'^user/delete/(?P<pk>[0-9]+)/$', views.delete_user),

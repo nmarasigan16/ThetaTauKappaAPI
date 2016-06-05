@@ -33,16 +33,61 @@ def upgrade(user):
     new_bro.save()
     user.save()
 
+"""
+Checks a members password against a meeting password
+@param:
+    Attendance object
+    meeting password
+@return:
+    boolean indicating match
+"""
+def check_password(attendance, password):
+    if not attendance.password:
+        return False
+    return attendance.password == password
 
+"""
+Increments members gm count and adds the meeting to their meetings
+@param:
+    Userprofile object
+    meeting object
+"""
+def add_to_meeting(member, meeting):
+    if meeting in member.hours.meetings.all():
+        return
+    member.hours.meetings.add(meeting)
+    member.hours.save()
+    member.brother.gms += 1
+    member.brother.save()
 
-
+#########################################################################################################
 """
 Wrappers
 """
-def initiate(members):
-    for member in members:
-        if(status_check(member, 'P') == True):
-            upgrade(member)
+def initiate(pledges):
+    for pledge in pledges:
+        upgrade(pledge)
 
+
+"""
+Takes attendance for a gm
+@param:
+    meeting object to take attendance for
+    members of the chapter that is taking attendance
+@return:
+    List object with the user email as the key, excuse as the value
+"""
+def attendance(members, meeting):
+    password = meeting.password
+    excuses = {}
+    for member in members:
+        match = check_password(member.attendance, password)
+        if match:
+            add_to_meeting(member, meeting)
+        elif not not member.attendance.excuse: #lmao
+            excuses[member.id] = member.attendance.excuse
+            member.attendance.excuse = ""
+            member.attendance.save()
+    return excuses
 
 
