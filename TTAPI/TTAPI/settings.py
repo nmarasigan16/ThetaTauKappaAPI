@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import email_info
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -147,6 +148,12 @@ ACCOUNT_USERNAME_REQUIRED=True
 ACCOUNT_EMAIL_REQUIRED=True
 ACCOUNT_AUTHENTICATION_METHOD='username'
 ACCOUNT_EMAIL_VERIFICATION="none"
+
+EMAIL_USE_SSL=True
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_PORT=465
+EMAIL_HOST_USER = email_info._user
+EMAIL_HOST_PASSWORD = email_info._password
 
 REST_FRAMEWORK = {
         'DEFAULT_AUTHENTICATION_CLASSES':(

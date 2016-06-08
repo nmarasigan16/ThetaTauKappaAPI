@@ -14,6 +14,13 @@ try:
 except ImportError:
     raise ImportError('allauth needs to be added to INSTALLED_APPS.')
 
+class EmailSerializer(serializers.Serializer):
+    subject=serializers.CharField(style={'base_template': 'textarea.html'})
+    message=serializers.CharField(style={'base_template': 'textarea.html'})
+    class Meta:
+        fields = ('subject', 'message')
+
+
 class InterviewSerializer(serializers.ModelSerializer):
     pledge = serializers.PrimaryKeyRelatedField(read_only=True, default = None)
     class Meta:

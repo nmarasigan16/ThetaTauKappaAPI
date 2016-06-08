@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
+from django.core.mail import send_mail
 
 from rest_framework import status, generics, permissions
 from rest_framework.views import APIView
@@ -9,6 +10,7 @@ from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from django.core import serializers
 from django.http import Http404
+from TTAPI import email_info
 
 #auth stuff
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
@@ -17,7 +19,7 @@ from app.serializers import (
         UserSerializer, ChapterSerializer, DemographicsSerializer,
         EventSerializer, MeetingSerializer, PledgeSerializer,
         BrotherSerializer, UserDetailsSerializer, EventDetailsSerializer,
-        AttendanceSerializer, InterviewSerializer
+        AttendanceSerializer, InterviewSerializer, EmailSerializer
         )
 from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Attendance, Interview
 from app.models import UserProfile as User
@@ -50,9 +52,9 @@ A List of Functions that are included
     -Pledge initiation
     -Delete user
     -Modify user officer status
+    -Take attendance for a gm
 
 -TODO Functions
-    -Take attendance for a gm
     -Allow interviews to be input and processed
     -send emails to all users
     -edit user profile
@@ -107,7 +109,7 @@ def has_chapter(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        return Response({'has_chapter': '%b' % (False if chapterless else True)}, status=status.HTTP_200_OK)
+        return Response({'has_chapter': '%r' % (False if chapterless else True)}, status=status.HTTP_200_OK)
 
 """
 Function to change the chapter of the current user
@@ -153,9 +155,9 @@ def check_reqs(request):
         user = request.user.profile
     except user.profile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    if request == 'GET':
+    if request.method == 'GET':
         reqs = all_functions.format_reqs(user)
-        return Response(reqs)
+        return Response(reqs, status=status.HTTP_200_OK)
 """
 Adds an event to the users events that they've attended and updates their hours
 @return:
@@ -272,6 +274,16 @@ class MeetingViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOfficer,)
     queryset= Meeting.objects.all()
     serializer_class = MeetingSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        meeting = self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(create_msg_dict("meeting created"), status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        meeting = serializer.save(self.request)
+        return meeting
 
 """
 'Initiates' pledges.
@@ -316,6 +328,25 @@ class TakeAttendance(APIView):
         members = User.objects.filter(chapter=chapter, demographics__in=demographics_list)
         excuses = officer_functions.attendance(members, meeting)
         return Response(excuses, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def email(request, who):
+    permission_classes=(IsOfficer,)
+    try:
+        chapter = request.user.profile.chapter
+        d_list = Demographics.objects.filter(status=who)
+        members = User.objects.filter(chapter=chapter, demographics__in=d_list)
+    except User.DoesNotExist or Demographics.DoesNotExist:
+        raise Http404
+
+    if request.method == 'POST':
+        serializer = EmailSerializer(data=request.data)
+        recipients = list(set(user.user.email for user in members))
+        if serializer.is_valid():
+            send_mail(serializer.validated_data['subject'], serializer.validated_data['message'], email_info._user, recipients)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 """
 Admin only functions and viewsets

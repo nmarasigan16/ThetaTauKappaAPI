@@ -90,4 +90,3 @@ def attendance(members, meeting):
             member.attendance.save()
     return excuses
 
-

@@ -13,13 +13,13 @@ def format_reqs(user):
     reqs['professional'] = user.hours.professional
     reqs['philanthropy'] = user.hours.philanthropy
     reqs['brotherhood'] = user.hours.brotherhood
-    if user.status == 'P':
+    if user.demographics.status == 'P':
         #assemble requirements for pledges in dictionary
         pledge = user.pledge
         reqs['pledge family'] = pledge.family
         reqs['brother signatures'] = pledges.brother
         reqs['pledge signatures'] = pledges.pledge
-    elif user.status == 'B':
+    elif user.demographics.status == 'B':
         #assemble requirements for brother in dictionary
         brother = user.brother
         reqs['GMs'] = brother.gms

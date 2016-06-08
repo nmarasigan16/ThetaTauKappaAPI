@@ -23,7 +23,7 @@ urlpatterns=[
     url(r'^user/chapter/change/(?P<pk>[0-9]+)/$', views.change_chapter),
 
     #all user functions
-    url(r'^hours/check/(?P<pk>[0-9]+)/$', views.check_reqs),
+    url(r'^hours/check/$', views.check_reqs),
     url(r'^hours/update/(?P<pke>[0-9]+)/(?P<hours>[0-9]+(\.(5|0))?)/$', views.add_event),
     url(r'^attendance/update/$', views.AttendanceDetail.as_view()),
 
@@ -35,6 +35,7 @@ urlpatterns=[
     #officer functions
     url(r'^pledges/initiate/$', views.initiate_pledges),
     url(r'^attendance/(?P<pk>[0-9]+)/$', views.TakeAttendance.as_view()),
+    url(r'^email/(?P<who>(B|P|A))/$', views.email),
 
     #admin functions
     url(r'^user/delete/(?P<pk>[0-9]+)/$', views.delete_user),
