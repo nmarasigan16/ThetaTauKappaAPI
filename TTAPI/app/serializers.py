@@ -167,11 +167,10 @@ class UserDetailsSerializer(serializers.Serializer):
     name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='user.profile.demographics')
     email = serializers.SlugRelatedField(slug_field='email', source='user', read_only=True)
     phone_number = serializers.SlugRelatedField(read_only=True, slug_field='phone_number', source='demographics')
-    chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name')
     city = serializers.SlugRelatedField(slug_field='city', source='demographics', read_only=True)
 
     class Meta:
-        fields = ('name', 'email', 'phone_number', 'chapter')
+        fields = ('name', 'email', 'phone_number', 'city')
 
 class EventDetailsSerializer(serializers.ModelSerializer):
     class Meta:
