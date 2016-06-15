@@ -217,6 +217,8 @@ class Brother(models.Model):
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, primary_key=True, related_name='brother')
     #gm stuff
     gms = models.PositiveIntegerField(default=0)
+    e_absences = models.PositiveIntegerField(default=0)
+    u_absences = models.PositiveIntegerField(default=0)
 """
 Class for hours
 Used to log attendance for all brothers

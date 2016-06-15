@@ -53,10 +53,10 @@ A List of Functions that are included
     -Delete user
     -Modify user officer status
     -Take attendance for a gm
+    -send emails to all users
 
 -TODO Functions
     -Allow interviews to be input and processed
-    -send emails to all users
     -edit user profile
 
 """
