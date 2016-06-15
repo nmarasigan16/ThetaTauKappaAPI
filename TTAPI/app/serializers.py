@@ -175,7 +175,7 @@ class UserDetailsSerializer(serializers.Serializer):
 class EventDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ('event_id', 'name', 'date', 'time', 'location', 'about', 'etype')
+        fields = ('event_id', 'name', 'date','location', 'about', 'etype')
 
 class EventSerializer(serializers.ModelSerializer):
     creator = UserDetailsSerializer(read_only=True, default = None)
