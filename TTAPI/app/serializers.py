@@ -99,6 +99,8 @@ class HourSerializer(serializers.ModelSerializer):
         model = Hours
         fields = ('user', 'brotherhood', 'professional', 'philanthropy', 'events', 'meetings')
 
+
+
 class UserSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(read_only=True, slug_field='email', default=None)
     chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name', default=None)
