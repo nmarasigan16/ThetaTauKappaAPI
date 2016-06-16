@@ -16,7 +16,9 @@ urlpatterns=[
     url(r'^', include(router.urls)),
 
     url(r'^users/$', views.UserDetailList.as_view()),
+    url(r'^users/detail/(?P<pk>[0-9]+)/$', views.UserDetail.as_view()),
     url(r'^events/$', views.EventDetailList.as_view()),
+    url(r'^events/detail/(?P<pk>[0-9]+)/$', views.EventDetail.as_view()),
 
     #utility functions (mostly workarounds)
     url(r'^user/chapter/check/$', views.has_chapter),
