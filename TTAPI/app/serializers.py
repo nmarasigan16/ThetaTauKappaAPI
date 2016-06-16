@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Hours, Attendance, Interview
+from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Hours, Attendance, Interview, Excuse
 from app.models import UserProfile as User
 from django.http import HttpRequest
 from django.conf import settings
@@ -52,11 +52,22 @@ class DemographicsSerializer(serializers.ModelSerializer):
         model = Demographics
         fields = ('user', 'name',  'phone_number', 'major', 'status', 'city')
 
+class ExcuseSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    meeting = serializers.SlugRelatedField(read_only=True, slug_field = 'date')
+    class Meta:
+        model = Excuse
+        fields = ('excuse_id', 'user', 'meeting', 'excuse')
 
+class ExcuseSkeletonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Excuse
+        fields = ('excuse_id', 'excuse')
 
 class MeetingSerializer(serializers.ModelSerializer):
     chapter = serializers.SlugRelatedField(read_only=True, required=False, slug_field = 'chapter_name')
     attendees = serializers.StringRelatedField(many=True)
+    excuses = ExcuseSkeletonSerializer(many=True)
     class Meta:
         model = Meeting
         fields = ('meeting_id', 'password', 'mtype', 'date', 'chapter', 'attendees')

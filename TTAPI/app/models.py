@@ -248,3 +248,9 @@ class Interview(models.Model):
 
     class Meta:
         ordering = ['pledge']
+
+class Excuse(models.Model):
+    excuse_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='excuses')
+    meeting = models.ForeignKey(Meeting, on_delete=models.CASCADE, related_name='excuses')
+    excuse = models.TextField()

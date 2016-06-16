@@ -1,4 +1,4 @@
-from app.models import Brother
+from app.models import Brother, Excuse
 
 
 """
@@ -60,6 +60,17 @@ def add_to_meeting(member, meeting):
     member.brother.gms += 1
     member.brother.save()
 
+"""
+Makes an excuse object and links it to the user and the meeting
+@param
+    excuse text
+    member whos excuse it is
+    meeting for which the excuse is
+"""
+def add_excuse(excuse, member, meeting):
+    excuse_obj = Excuse.objects.create(user=member, meeting=meeting, excuse=excuse)
+    excuse_obj.save()
+
 #########################################################################################################
 """
 Wrappers
@@ -85,7 +96,7 @@ def attendance(members, meeting):
         if match:
             add_to_meeting(member, meeting)
         elif not not member.attendance.excuse: #lmao
-            excuses[member.id] = member.attendance.excuse
+            add_excuse(member.attendance.excuse, member, meeting)
             member.attendance.excuse = ""
             member.attendance.save()
     return excuses
