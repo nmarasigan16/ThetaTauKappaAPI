@@ -72,6 +72,7 @@ MIDDLEWARE_CLASSES = [
 ROOT_URLCONF = 'TTAPI.urls'
 #TODO whitelist app url
 #url: https://github.com/ottoyiu/django-cors-headers/
+CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {

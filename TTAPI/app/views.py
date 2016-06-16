@@ -56,7 +56,8 @@ A List of Functions that are included
     -send emails to all users
 
 -TODO Functions
-    -Allow interviews to be input and processed
+    -Allow interviews to be processed
+    -allow excuses to be processed
     -edit user profile
 
 """
@@ -75,6 +76,18 @@ class UserDetailList(generics.ListAPIView):
         user = self.request.user
         return User.objects.filter(chapter = user.profile.chapter)
 
+class UserDetail(APIView):
+    permission_classes = (ReadOnly,)
+    def get_object(self, pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+    def get(self, request, pk, format=None):
+        user = self.get_object(pk)
+        serializer = UserDetailsSerializer(user)
+        return Response(serializer.data)
+
 #viewset for events
 class EventDetailList(generics.ListAPIView):
     permission_classes = (ReadOnly,)
@@ -82,6 +95,18 @@ class EventDetailList(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Event.objects.filter(chapter = user.profile.chapter)
+
+class EventDetail(APIView):
+    permission_classes = (ReadOnly,)
+    def get_object(self, pk):
+        try:
+            return Event.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+    def get(self, request, pk, format=None):
+        event = self.get_object(pk)
+        serializer = EventDetailsSerializer(event)
+        return Response(serializer.data)
 
 #viewset for
 class InterviewDetailList(generics.ListAPIView):
@@ -93,6 +118,7 @@ class InterviewDetailList(generics.ListAPIView):
 
 ##########################################################################################################
 """
+TODO: rewrite register serializer so that way we can register without needing this
 This function is for when we want to add a user to a chapter.  This ideally should happen right after the first
 login by checking if the user has a chapter
 @param:
