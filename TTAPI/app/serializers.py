@@ -22,7 +22,7 @@ class EmailSerializer(serializers.Serializer):
 
 
 class InterviewSerializer(serializers.ModelSerializer):
-    pledge = serializers.PrimaryKeyRelatedField(read_only=True, default = None)
+    pledge = serializers.StringRelatedField(read_only=True, default = None)
     class Meta:
         model = Interview
         fields = ('interview_id', 'pledge', 'brother', 'description')
