@@ -99,5 +99,9 @@ def attendance(members, meeting):
             add_excuse(member.attendance.excuse, member, meeting)
             member.attendance.excuse = ""
             member.attendance.save()
+        else:
+            x = member.brother.u_absences
+            member.brother.u_absences = x+1;
+            member.brother.save()
     return excuses
 

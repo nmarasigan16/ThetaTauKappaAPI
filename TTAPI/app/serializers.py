@@ -60,6 +60,7 @@ class ExcuseSerializer(serializers.ModelSerializer):
         fields = ('excuse_id', 'user', 'meeting', 'excuse')
 
 class ExcuseSkeletonSerializer(serializers.ModelSerializer):
+    name = serializers.StringRelatedField(source='user')
     class Meta:
         model = Excuse
         fields = ('excuse_id', 'excuse')
@@ -70,7 +71,7 @@ class MeetingSerializer(serializers.ModelSerializer):
     excuses = ExcuseSkeletonSerializer(many=True)
     class Meta:
         model = Meeting
-        fields = ('meeting_id', 'password', 'mtype', 'date', 'chapter', 'attendees')
+        fields = ('meeting_id', 'password', 'mtype', 'date', 'chapter', 'attendees', 'excuses')
     def save(self, request):
         chapter = request.user.profile.chapter
         validated_data = self.validated_data
