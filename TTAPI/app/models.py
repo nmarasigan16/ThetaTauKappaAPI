@@ -244,6 +244,7 @@ class Interview(models.Model):
     interview_id = models.AutoField(primary_key=True)
     pledge = models.ForeignKey(Pledge, on_delete=models.CASCADE, related_name="interviews")
     brother = models.CharField(max_length=50)
+    itype = models.CharField(max_length=1, default='B');
     description = models.TextField()
 
     class Meta:
