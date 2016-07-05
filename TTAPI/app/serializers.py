@@ -176,15 +176,15 @@ class VerifyEmailSerializer(serializers.Serializer):
 """
 All detail serializers.  Useful to view information
 """
-class UserDetailsSerializer(serializers.Serializer):
-
+class UserDetailsSerializer(serializers.ModelSerializer):
     name = serializers.SlugRelatedField(read_only=True, slug_field='name', source='user.profile.demographics')
     email = serializers.SlugRelatedField(slug_field='email', source='user', read_only=True)
     phone_number = serializers.SlugRelatedField(read_only=True, slug_field='phone_number', source='demographics')
     city = serializers.SlugRelatedField(slug_field='city', source='demographics', read_only=True)
 
     class Meta:
-        fields = ('name', 'email', 'phone_number', 'city')
+        model = User
+        fields = ('id', 'name', 'email', 'phone_number', 'city')
 
 class EventDetailsSerializer(serializers.ModelSerializer):
     class Meta:

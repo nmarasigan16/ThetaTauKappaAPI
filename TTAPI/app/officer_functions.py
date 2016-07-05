@@ -51,13 +51,17 @@ Increments members gm count and adds the meeting to their meetings
 @param:
     Userprofile object
     meeting object
+    boolean determining if they are added for an excused absence or a gm
 """
-def add_to_meeting(member, meeting):
+def add_to_meeting(member, meeting, exc):
     if meeting in member.hours.meetings.all():
         return
     member.hours.meetings.add(meeting)
     member.hours.save()
-    member.brother.gms += 1
+    if exc:
+        member.brother.e_absences += 1
+    else:
+        member.brother.gms += 1
     member.brother.save()
 
 """
@@ -94,7 +98,7 @@ def attendance(members, meeting):
     for member in members:
         match = check_password(member.attendance, password)
         if match:
-            add_to_meeting(member, meeting)
+            add_to_meeting(member, meeting, False)
         elif not not member.attendance.excuse: #lmao
             add_excuse(member.attendance.excuse, member, meeting)
             member.attendance.excuse = ""
@@ -103,5 +107,41 @@ def attendance(members, meeting):
             x = member.brother.u_absences
             member.brother.u_absences = x+1;
             member.brother.save()
-    return excuses
+    return meeting.excuses
 
+"""
+Approves or denies an excuse
+@param
+    excuse to be approved or denied
+    boolean indicating approval(true) or denial (false)
+@return
+    status
+"""
+def process_excuse(excuse, approved):
+    if approved:
+        add_to_meeting(excuse.user, excuse.meeting, True)
+    else:
+        excuse.user.u_absences += 1
+    excuse.user.save()
+    excuse.delete()
+    return "set excuse to %s"%(approved)
+
+"""
+Approves or denies an interview
+@param:
+    interview to be processed
+    boolean indicating approval(true) or denial (false)
+@return:
+    message
+"""
+def process_interview(interview, approved):
+    if not approved:
+        interview.delete()
+        return "rejected interview"
+    if interview.itype == 'B':
+        interview.pledge.brother += 1
+    else:
+        interview.pledge.pledge += 1
+    interview.pledge.save()
+    interview.delete()
+    return "interview approved"

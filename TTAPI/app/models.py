@@ -202,14 +202,8 @@ Gives additional attributes:
     -philanthropy
     -professional
     -gms
-
-    #used for gm attendance, wiped out after scribe takes attendance
-    -attendance password
-    -excuse
-
-    #used for status
-    -officer
-
+    -excused absences
+    -unexcused absences
 """
 class Brother(models.Model):
     #extends user class

@@ -279,6 +279,8 @@ Officer only functions:
 - Take attendance (technically should only happen by scribe, but anyone can do it).
 - See event attendance (useful for historian)
 - Initiate pledges
+- Email
+- Approval functions (excuses and interviews)
 """
 
 class EventViewSet(viewsets.ModelViewSet):
@@ -373,6 +375,39 @@ def email(request, who):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#maybe the get is misleading.  In order to not have to write a serializer for the small amount of data, we're just pulling parameters from the url
+@api_view(['GET'])
+def approve_excuse(request, excuse_id, status):
+    permission_classes=(IsOfficer,)
+    try:
+        excuse = Excuse.objects.get(pk=excuse_id)
+        if status == 1:
+            approved = True
+        else:
+            approved = False
+    except Excuse.DoesNotExist:
+        raise Http404
+
+    if request.method == 'GET':
+        message = officer_functions.process_excuse(excuse, approved)
+        return Response(create_msg_dict(message), status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def approve_interview(request, interview_id, status):
+    permission_classes=(IsOfficer,)
+    try:
+        interview = Interview.objects.get(pk=interview_id)
+        if status == 1:
+            approved = True
+        else:
+            approved = False
+    except Interview.DoesNotExist:
+        raise Http404
+
+    if request.method == 'GET':
+        message = officer_functions.process_interview(interview, approved)
+        return Response(create_msg_dict(message), status=status.HTTP_200_OK)
 
 """
 Admin only functions and viewsets
