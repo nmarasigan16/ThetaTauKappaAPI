@@ -78,6 +78,10 @@ class UserProfile(models.Model):
                 ('officer', 'Is an officer'),
             )
 
+    def __unicode__(self):
+        return '%s' % (self.demographics.name)
+
+
 """
 Event class
 

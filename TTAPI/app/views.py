@@ -54,10 +54,10 @@ A List of Functions that are included
     -Modify user officer status
     -Take attendance for a gm
     -send emails to all users
-
--TODO Functions
     -Allow interviews to be processed
     -allow excuses to be processed
+
+-TODO Functions
     -edit user profile
 
 """
@@ -282,6 +282,11 @@ Officer only functions:
 - Email
 - Approval functions (excuses and interviews)
 """
+@api_view(['GET'])
+def officer_check(request):
+    permission_classes = (IsOfficer,)
+    if request.method == 'GET':
+        return Response(status=status.HTTP_200_OK)
 
 class EventViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOfficer,)

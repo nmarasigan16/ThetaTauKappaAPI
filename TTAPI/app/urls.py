@@ -35,9 +35,12 @@ urlpatterns=[
     url(r'^interviews/log/$', views.LogInterview.as_view()),
 
     #officer functions
+    url(r'^officer/$', views.officer_check),
     url(r'^pledges/initiate/$', views.initiate_pledges),
     url(r'^attendance/(?P<pk>[0-9]+)/$', views.TakeAttendance.as_view()),
     url(r'^email/(?P<who>(B|P|A))/$', views.email),
+    url(r'^excuse/approve/(?P<excuse_id>[0-9]+)/(?P<status>0|1)/$', views.approve_excuse),
+    url(r'^interview/approve/(?P<excuse_id>[0-9]+)/(?P<status>0|1)/$', views.approve_interview),
 
     #admin functions
     url(r'^user/delete/(?P<pk>[0-9]+)/$', views.delete_user),

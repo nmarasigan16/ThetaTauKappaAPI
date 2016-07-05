@@ -1,6 +1,7 @@
 from rest_framework import serializers
+from rest_auth.serializers import UserDetailsSerializer
 from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Hours, Attendance, Interview, Excuse
-from app.models import UserProfile as User
+from app.models import UserProfile as UserProfile
 from django.http import HttpRequest
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -63,7 +64,7 @@ class ExcuseSkeletonSerializer(serializers.ModelSerializer):
     name = serializers.StringRelatedField(source='user')
     class Meta:
         model = Excuse
-        fields = ('excuse_id', 'excuse')
+        fields = ('excuse_id', 'excuse', 'name')
 
 class MeetingSerializer(serializers.ModelSerializer):
     chapter = serializers.SlugRelatedField(read_only=True, required=False, slug_field = 'chapter_name')
@@ -112,7 +113,7 @@ class UserSerializer(serializers.ModelSerializer):
     hours = HourSerializer()
 
     class Meta:
-        model=User
+        model=UserProfile
         fields = ('user', 'id', 'chapter', 'demographics', 'brother', 'pledge', 'attendance', 'hours')
 
 #overwrites register serializer so that way it spins off a user instance with all the proper things
@@ -183,7 +184,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     city = serializers.SlugRelatedField(slug_field='city', source='demographics', read_only=True)
 
     class Meta:
-        model = User
+        model = UserProfile
         fields = ('id', 'name', 'email', 'phone_number', 'city')
 
 class EventDetailsSerializer(serializers.ModelSerializer):
@@ -197,7 +198,7 @@ class EventSerializer(serializers.ModelSerializer):
     attendees = serializers.StringRelatedField(many=True)
     class Meta:
         model = Event
-        fields = ('event_id', 'name', 'creator', 'date', 'time', 'duration', 'location', 'about', 'etype', 'chapter', 'attendees')
+        fields = ('event_id', 'name', 'creator', 'date', 'duration', 'location', 'about', 'etype', 'chapter', 'attendees')
 
     def save(self, request):
         creator = request.user.profile
@@ -207,3 +208,9 @@ class EventSerializer(serializers.ModelSerializer):
         validated_data['chapter'] = chapter
         event = Event.objects.create(**validated_data)
         return event
+
+class ProfileSerializer(UserDetailsSerializer):
+    status = serializers.CharField(source='profile.demographics.status')
+
+    class Meta(UserDetailsSerializer.Meta):
+        fields = ('status',)
