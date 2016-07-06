@@ -141,7 +141,7 @@ class RegisterSerializer(serializers.Serializer):
         return data
 
     def custom_signup(self, request, user):
-        profile = User.objects.create(user=user)
+        profile = UserProfile.objects.create(user=user)
         data = self.validated_data
         d_data = data['demographics']
         d_data['user']=profile

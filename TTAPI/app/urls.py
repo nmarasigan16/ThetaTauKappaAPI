@@ -21,6 +21,7 @@ urlpatterns=[
     url(r'^events/detail/(?P<pk>[0-9]+)/$', views.EventDetail.as_view()),
 
     #utility functions (mostly workarounds)
+    url(r'^user/status/$', views.status_check),
     url(r'^user/chapter/check/$', views.has_chapter),
     url(r'^user/chapter/change/(?P<pk>[0-9]+)/$', views.change_chapter),
 

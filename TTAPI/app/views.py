@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
 from django.core import serializers
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from TTAPI import email_info
 
 #auth stuff
@@ -135,7 +135,7 @@ def has_chapter(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        return Response({'has_chapter': '%r' % (False if chapterless else True)}, status=status.HTTP_200_OK)
+        return JsonResponse({'has_chapter': '%r' % (False if chapterless else True)}, status=status.HTTP_200_OK)
 
 """
 Function to change the chapter of the current user
@@ -157,7 +157,16 @@ def change_chapter(request, pk):
         profile.chapter = chapter
         profile.save()
         chapter.save()
-        return Response(create_msg_dict('User %s added to Chapter %s' % (profile.demographics.name, chapter.chapter_name)), status = status.HTTP_200_OK)
+        return JsonResponse(create_msg_dict('User %s added to Chapter %s' % (profile.demographics.name, chapter.chapter_name)), status = status.HTTP_200_OK)
+
+@api_view(['GET'])
+def status_check(request):
+    permission_classes = (ReadOnly,)
+    if request.method == 'GET':
+        if(request.user.id):
+            return JsonResponse({'status': request.user.profile.demographics.status}, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
 ############################################################################################################
 """
@@ -183,7 +192,7 @@ def check_reqs(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
         reqs = all_functions.format_reqs(user)
-        return Response(reqs, status=status.HTTP_200_OK)
+        return JsonResponse(reqs, status=status.HTTP_200_OK)
 """
 Adds an event to the users events that they've attended and updates their hours
 @return:
@@ -199,7 +208,7 @@ def add_event(request, pke, hours):
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
         outcome = all_functions.adder(user, event, hours)
-        return Response(create_msg_dict(create_msg_dict("Event %s added for user %s" % (event.name, user.email))), status=status.HTTP_200_OK)
+        return JsonResponse(create_msg_dict(create_msg_dict("Event %s added for user %s" % (event.name, user.email))), status=status.HTTP_200_OK)
 
 """
 Allows pledges to edit and look at the interviews that they have input
@@ -244,7 +253,7 @@ class LogInterview(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         interview = self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(create_msg_dict("Interview logged"), status=status.HTTP_201_CREATED, headers=headers)
+        return JsonResponse(create_msg_dict("Interview logged"), status=status.HTTP_201_CREATED, headers=headers)
     def perform_create(self, serializer):
         interview = serializer.save(self.request)
         return interview
@@ -286,7 +295,11 @@ Officer only functions:
 def officer_check(request):
     permission_classes = (IsOfficer,)
     if request.method == 'GET':
-        return Response(status=status.HTTP_200_OK)
+        officers = Group.objects.get(name='officers').user_set.all()
+        if request.user in officers:
+            return Response(status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
 class EventViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOfficer,)
@@ -297,7 +310,7 @@ class EventViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         event = self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(create_msg_dict("event created"), status=status.HTTP_201_CREATED, headers=headers)
+        return JsonResponse(create_msg_dict("event created"), status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         event = serializer.save(self.request)
@@ -312,7 +325,7 @@ class MeetingViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         meeting = self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(create_msg_dict("meeting created"), status=status.HTTP_201_CREATED, headers=headers)
+        return JsonResponse(create_msg_dict("meeting created"), status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         meeting = serializer.save(self.request)
@@ -338,7 +351,7 @@ def initiate_pledges(request):
         demographics_list = Demographics.objects.filter(status='P')
         members = User.objects.filter(chapter=chapter, demographics__in=demographics_list)
         officer_functions.initiate(members)
-        return Response(create_msg_dict("Pledges for " + chapter.chapter_name + " intiated"), status=status.HTTP_200_OK)
+        return JsonResponse(create_msg_dict("Pledges for " + chapter.chapter_name + " intiated"), status=status.HTTP_200_OK)
 
 """
 Checks users password against the password in their attendance object if they are a brother
@@ -360,7 +373,7 @@ class TakeAttendance(APIView):
         demographics_list = Demographics.objects.filter(status='B')
         members = User.objects.filter(chapter=chapter, demographics__in=demographics_list)
         excuses = officer_functions.attendance(members, meeting)
-        return Response(excuses, status=status.HTTP_200_OK)
+        return JsonResponse(excuses, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def email(request, who):
@@ -395,7 +408,7 @@ def approve_excuse(request, excuse_id, status):
 
     if request.method == 'GET':
         message = officer_functions.process_excuse(excuse, approved)
-        return Response(create_msg_dict(message), status=status.HTTP_200_OK)
+        return JsonResponse(create_msg_dict(message), status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -412,7 +425,7 @@ def approve_interview(request, interview_id, status):
 
     if request.method == 'GET':
         message = officer_functions.process_interview(interview, approved)
-        return Response(create_msg_dict(message), status=status.HTTP_200_OK)
+        return JsonResponse(create_msg_dict(message), status=status.HTTP_200_OK)
 
 """
 Admin only functions and viewsets
@@ -450,10 +463,10 @@ def delete_user(request, pk):
     try:
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return JsonResponse(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'DELETE':
         user.delete()
-        return Response(create_msg_dict("User deleted"), status=status.HTTP_200_OK)
+        return JsonResponse(create_msg_dict("User deleted"), status=status.HTTP_200_OK)
 
 
 """
@@ -477,14 +490,14 @@ def modify_officer_status(request, pk, operation):
         elif operation == '273':
             group.user_set.clear()
         else:
-            return Response(create_msg_dict(
+            return JsonResponse(create_msg_dict(
                 "Please use a 1 or a 0 to indicate the operation on the user"
                 ),
                 status=status.HTTP_400_BAD_REQUEST)
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
-        return Response(create_msg_dict('Officer status for user %s changed' % user.profile.demographics.name),
+        return JsonResponse(create_msg_dict('Officer status for user %s changed' % user.profile.demographics.name),
                 status=status.HTTP_200_OK)
 
 def create_msg_dict(msg):
