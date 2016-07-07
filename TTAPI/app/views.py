@@ -28,7 +28,7 @@ from app.models import UserProfile as User
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.models import User as auth_user
 from django.contrib.contenttypes.models import ContentType
-from app.permissions import IsOfficer, ReadOnly, IsPledge
+from app.permissions import IsOfficer, ReadOnly, IsPledge, IsOwner
 
 #external files
 import officer_functions, all_functions
@@ -159,14 +159,11 @@ def change_chapter(request, pk):
         chapter.save()
         return JsonResponse(create_msg_dict('User %s added to Chapter %s' % (profile.demographics.name, chapter.chapter_name)), status = status.HTTP_200_OK)
 
-@api_view(['GET'])
-def status_check(request):
+class StatusCheck(APIView):
     permission_classes = (ReadOnly,)
-    if request.method == 'GET':
-        if(request.user.id):
-            return JsonResponse({'status': request.user.profile.demographics.status}, status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+    def get(self, request, format=None):
+        return JsonResponse({'status': request.user.profile.demographics.status}, status=status.HTTP_200_OK)
+
 
 ############################################################################################################
 """
@@ -183,32 +180,31 @@ Used by a user to get the requirements that they have fulfilled
 @return:
     a dictionary with the appropriate requirements as keys and the amount they've fulfilled as values
 """
-@api_view(['GET'])
-def check_reqs(request):
+class CheckReqs(APIView):
     permission_classes = (IsAuthenticated,)
-    try:
+    def get(self, request, format=None):
         user = request.user.profile
-    except user.profile.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
         reqs = all_functions.format_reqs(user)
         return JsonResponse(reqs, status=status.HTTP_200_OK)
+
 """
 Adds an event to the users events that they've attended and updates their hours
 @return:
     message indicating status of the add
 """
-@api_view(['GET'])
-def add_event(request, pke, hours):
+class AddEvent(APIView):
     permission_classes = (IsAuthenticated,)
-    try:
+    def get_object(self, pke):
+        try:
+            return Event.objects.get(pk = pke)
+        except Event.DoesNotExist:
+            raise Http404
+    def get(self, request, pke, hours, format=None):
         user = request.user.profile
-        event = Event.objects.get(pk = pke)
-    except user.profile.DoesNotExist or Event.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
+        event = self.get_object(pke)
         outcome = all_functions.adder(user, event, hours)
-        return JsonResponse(create_msg_dict(create_msg_dict("Event %s added for user %s" % (event.name, user.email))), status=status.HTTP_200_OK)
+        return JsonResponse(create_msg_dict("Event %s added for user %s" % (event.name, user.demographics.name)), status=status.HTTP_200_OK)
+
 
 """
 Allows pledges to edit and look at the interviews that they have input
@@ -218,8 +214,7 @@ Allows pledges to edit and look at the interviews that they have input
     updated interview or interview that has the pk
 """
 #TODO make this a RetrieveUpdateAPIView
-@api_view(['GET', 'PUT'])
-def edit_interview(request, pk):
+class EditInterview(generics.RetrieveUpdateAPIView):
     permission_classes = (IsPledge, IsOwner,)
     def get_object(self, pk):
         try:
@@ -291,15 +286,10 @@ Officer only functions:
 - Email
 - Approval functions (excuses and interviews)
 """
-@api_view(['GET'])
-def officer_check(request):
+class OfficerCheck(APIView):
     permission_classes = (IsOfficer,)
-    if request.method == 'GET':
-        officers = Group.objects.get(name='officers').user_set.all()
-        if request.user in officers:
-            return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+    def get(self, request, format=None):
+        return Response(status=status.HTTP_200_OK)
 
 class EventViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOfficer,)
@@ -340,14 +330,15 @@ and replaces it with a new brother instance
 @return:
     response indicating status
 """
-@api_view(['GET'])
-def initiate_pledges(request):
+class InitiatePledges(APIView):
     permission_classes=(IsOfficer,)
-    try:
-        chapter = request.user.profile.chapter
-    except Chapter.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
+    def get_object(self, user):
+        try:
+            return user.chapter
+        except Chapter.DoesNotExist:
+            raise Http404
+    def get(self, request):
+        chapter = self.get_object(request.user.profile)
         demographics_list = Demographics.objects.filter(status='P')
         members = User.objects.filter(chapter=chapter, demographics__in=demographics_list)
         officer_functions.initiate(members)
@@ -375,17 +366,13 @@ class TakeAttendance(APIView):
         excuses = officer_functions.attendance(members, meeting)
         return JsonResponse(excuses, status=status.HTTP_200_OK)
 
-@api_view(['POST'])
-def email(request, who):
+class Email(APIView):
     permission_classes=(IsOfficer,)
-    try:
+
+    def post(self, request, who):
         chapter = request.user.profile.chapter
         d_list = Demographics.objects.filter(status=who)
         members = User.objects.filter(chapter=chapter, demographics__in=d_list)
-    except User.DoesNotExist or Demographics.DoesNotExist:
-        raise Http404
-
-    if request.method == 'POST':
         serializer = EmailSerializer(data=request.data)
         recipients = list(set(user.user.email for user in members))
         if serializer.is_valid():
@@ -394,38 +381,33 @@ def email(request, who):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #maybe the get is misleading.  In order to not have to write a serializer for the small amount of data, we're just pulling parameters from the url
-@api_view(['GET'])
-def approve_excuse(request, excuse_id, status):
-    permission_classes=(IsOfficer,)
-    try:
-        excuse = Excuse.objects.get(pk=excuse_id)
-        if status == 1:
-            approved = True
-        else:
-            approved = False
-    except Excuse.DoesNotExist:
-        raise Http404
 
-    if request.method == 'GET':
+class ApproveExcuse(APIView):
+    permission_classes=(IsOfficer,)
+    def get_object(self, pk):
+        try:
+            return Excuse.objects.get(pk=pk)
+        except Excuse.DoesNotExist:
+            raise Http404
+    def get(self, request, excuse_id, status):
+        excuse = self.get_object(excuse_id)
+        approved = status == 1
         message = officer_functions.process_excuse(excuse, approved)
         return JsonResponse(create_msg_dict(message), status=status.HTTP_200_OK)
 
-
-@api_view(['GET'])
-def approve_interview(request, interview_id, status):
+class ApproveInterview(APIView):
     permission_classes=(IsOfficer,)
-    try:
-        interview = Interview.objects.get(pk=interview_id)
-        if status == 1:
-            approved = True
-        else:
-            approved = False
-    except Interview.DoesNotExist:
-        raise Http404
-
-    if request.method == 'GET':
+    def get_object(self, pk):
+        try:
+            return Interview.objects.get(pk=pk)
+        except Interview.DoesNotExist:
+            raise Http404
+    def get(self, request, interview_id, status):
+        interview = self.get_object(interview_id)
+        approved = status == 1
         message = officer_functions.process_interview(interview, approved)
         return JsonResponse(create_msg_dict(message), status=status.HTTP_200_OK)
+
 
 """
 Admin only functions and viewsets
@@ -477,12 +459,21 @@ change user officer status
 @return:
     success or failure and the type of operation in a json message
 """
-@api_view(['GET'])
-def modify_officer_status(request, pk, operation):
+class ModifyOfficerStatus(APIView):
     permission_classes=(IsAdminUser,)
-    try:
-        user=(User.objects.get(pk=pk)).user
-        group = Group.objects.get(name='officers')
+    def get_group(self, name):
+        try:
+            return Group.objects.get(name=name)
+        except Group.DoesNotExist:
+            raise Http404
+    def get_user(self, pk):
+        try:
+            return (User.objects.get(pk=pk)).user
+        except User.DoesNotExist:
+            raise Http404
+    def put(self, request, pk, operation):
+        user = self.get_user(pk)
+        group = self.get_group('officers')
         if operation == '1':
             group.user_set.add(user)
         elif operation == '0':
@@ -494,11 +485,9 @@ def modify_officer_status(request, pk, operation):
                 "Please use a 1 or a 0 to indicate the operation on the user"
                 ),
                 status=status.HTTP_400_BAD_REQUEST)
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if request.method == 'GET':
         return JsonResponse(create_msg_dict('Officer status for user %s changed' % user.profile.demographics.name),
                 status=status.HTTP_200_OK)
+
 
 def create_msg_dict(msg):
     return {'message':msg}

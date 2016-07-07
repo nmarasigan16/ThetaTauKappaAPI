@@ -21,30 +21,30 @@ urlpatterns=[
     url(r'^events/detail/(?P<pk>[0-9]+)/$', views.EventDetail.as_view()),
 
     #utility functions (mostly workarounds)
-    url(r'^user/status/$', views.status_check),
+    url(r'^user/status/$', views.StatusCheck.as_view()),
     url(r'^user/chapter/check/$', views.has_chapter),
     url(r'^user/chapter/change/(?P<pk>[0-9]+)/$', views.change_chapter),
 
     #all user functions
-    url(r'^hours/check/$', views.check_reqs),
-    url(r'^hours/update/(?P<pke>[0-9]+)/(?P<hours>[0-9]+(\.(5|0))?)/$', views.add_event),
+    url(r'^hours/check/$', views.CheckReqs.as_view()),
+    url(r'^hours/update/(?P<pke>[0-9]+)/(?P<hours>[0-9]+(\.(5|0))?)/$', views.AddEvent.as_view()),
     url(r'^attendance/update/$', views.AttendanceDetail.as_view()),
 
     #pledge functions
     url(r'^interviews/$', views.InterviewDetailList.as_view()),
-    url(r'^interviews/(?P<pk>[0-9]+)/$', views.edit_interview),
+    url(r'^interviews/(?P<pk>[0-9]+)/$', views.EditInterview.as_view()),
     url(r'^interviews/log/$', views.LogInterview.as_view()),
 
     #officer functions
-    url(r'^officer/$', views.officer_check),
-    url(r'^pledges/initiate/$', views.initiate_pledges),
+    url(r'^officer/$', views.OfficerCheck.as_view()),
+    url(r'^pledges/initiate/$', views.InitiatePledges.as_view()),
     url(r'^attendance/(?P<pk>[0-9]+)/$', views.TakeAttendance.as_view()),
-    url(r'^email/(?P<who>(B|P|A))/$', views.email),
-    url(r'^excuse/approve/(?P<excuse_id>[0-9]+)/(?P<status>0|1)/$', views.approve_excuse),
-    url(r'^interview/approve/(?P<excuse_id>[0-9]+)/(?P<status>0|1)/$', views.approve_interview),
+    url(r'^email/(?P<who>(B|P|A))/$', views.Email.as_view()),
+    url(r'^excuse/approve/(?P<excuse_id>[0-9]+)/(?P<status>0|1)/$', views.ApproveExcuse.as_view()),
+    url(r'^interview/approve/(?P<excuse_id>[0-9]+)/(?P<status>0|1)/$', views.ApproveInterview.as_view()),
 
     #admin functions
     url(r'^user/delete/(?P<pk>[0-9]+)/$', views.delete_user),
-    url(r'^user/officers/change/(?P<pk>[0-9]+)/(?P<operation>0|1|273)/$', views.modify_officer_status),
+    url(r'^user/officers/change/(?P<pk>[0-9]+)/(?P<operation>0|1|273)/$', views.ModifyOfficerStatus.as_view()),
 
 ]
