@@ -19,7 +19,7 @@ from app.serializers import (
         UserSerializer, ChapterSerializer, DemographicsSerializer,
         EventSerializer, MeetingSerializer, PledgeSerializer,
         BrotherSerializer, UserDetailsSerializer, EventDetailsSerializer,
-        AttendanceSerializer, InterviewSerializer, EmailSerializer
+        AttendanceSerializer, InterviewSerializer, EmailSerializer, EventCreateSerializer
         )
 from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Attendance, Interview
 from app.models import UserProfile as User
@@ -291,20 +291,25 @@ class OfficerCheck(APIView):
     def get(self, request, format=None):
         return Response(status=status.HTTP_200_OK)
 
-class EventViewSet(viewsets.ModelViewSet):
+class CreateEvent(generics.CreateAPIView):
     permission_classes = (IsOfficer,)
     queryset = Event.objects.all()
-    serializer_class = EventSerializer
+    serializer_class = EventCreateSerializer
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         event = self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return JsonResponse(create_msg_dict("event created"), status=status.HTTP_201_CREATED, headers=headers)
+        return JsonResponse(create_msg_dict("event created"), status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
         event = serializer.save(self.request)
         return event
+
+class EventViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsOfficer,)
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
 
 class MeetingViewSet(viewsets.ModelViewSet):
     permission_classes = (IsOfficer,)

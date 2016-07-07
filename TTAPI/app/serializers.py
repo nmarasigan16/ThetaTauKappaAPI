@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from datetime import datetime
 from rest_auth.serializers import UserDetailsSerializer
 from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Hours, Attendance, Interview, Excuse
 from app.models import UserProfile as UserProfile
@@ -191,6 +192,32 @@ class EventDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('event_id', 'name', 'date','location', 'about', 'etype')
+class EventCreateSerializer(serializers.ModelSerializer):
+    creator = UserDetailsSerializer(read_only=True, default = None)
+    date = serializers.CharField()
+    chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name', default=None)
+    class Meta:
+        model = Event
+        fields = ('event_id', 'name', 'creator', 'date', 'duration', 'location', 'about', 'etype', 'chapter')
+    def save(self, request):
+        creator = request.user.profile
+        chapter = request.user.profile.chapter
+        validated_data = self.validated_data
+        validated_data['creator'] = creator
+        validated_data['chapter'] = chapter
+
+        sdate = validated_data.pop('date')
+        year = (int)(sdate[0:4])
+        month = (int)(sdate[4:6])
+        day = (int)(sdate[6:8])
+        hour = (int)(sdate[8:10])
+        minute = (int)(sdate[10:12])
+
+        date = datetime(year, month, day, hour, minute)
+        validated_data['date'] = date
+
+        event = Event.objects.create(**validated_data)
+        return event
 
 class EventSerializer(serializers.ModelSerializer):
     creator = UserDetailsSerializer(read_only=True, default = None)
@@ -200,14 +227,6 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = ('event_id', 'name', 'creator', 'date', 'duration', 'location', 'about', 'etype', 'chapter', 'attendees')
 
-    def save(self, request):
-        creator = request.user.profile
-        chapter = request.user.profile.chapter
-        validated_data = self.validated_data
-        validated_data['creator'] = creator
-        validated_data['chapter'] = chapter
-        event = Event.objects.create(**validated_data)
-        return event
 
 class ProfileSerializer(UserDetailsSerializer):
     status = serializers.CharField(source='profile.demographics.status')

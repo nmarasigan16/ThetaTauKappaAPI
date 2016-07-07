@@ -36,6 +36,7 @@ urlpatterns=[
     url(r'^interviews/log/$', views.LogInterview.as_view()),
 
     #officer functions
+    url(r'^events/create/$', views.CreateEvent.as_view()),
     url(r'^officer/$', views.OfficerCheck.as_view()),
     url(r'^pledges/initiate/$', views.InitiatePledges.as_view()),
     url(r'^attendance/(?P<pk>[0-9]+)/$', views.TakeAttendance.as_view()),
