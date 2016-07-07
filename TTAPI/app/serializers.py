@@ -114,7 +114,7 @@ class BrotherSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = Brother
-        fields = ('user', 'gms')
+        fields = ('user', 'gms', 'e_absences', 'u_absences')
 
 class HourSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)

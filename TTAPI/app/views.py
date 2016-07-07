@@ -22,7 +22,7 @@ from app.serializers import (
         AttendanceSerializer, InterviewSerializer, EmailSerializer, EventCreateSerializer,
         MeetingCreateSerializer
         )
-from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Attendance, Interview
+from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Attendance, Interview, Excuse
 from app.models import UserProfile as User
 
 #for permissions
@@ -374,8 +374,8 @@ class TakeAttendance(APIView):
         chapter = request.user.profile.chapter
         demographics_list = Demographics.objects.filter(status='B')
         members = User.objects.filter(chapter=chapter, demographics__in=demographics_list)
-        excuses = officer_functions.attendance(members, meeting)
-        return JsonResponse(excuses, status=status.HTTP_200_OK)
+        officer_functions.attendance(members, meeting)
+        return JsonResponse(create_msg_dict("attendance taken"), status=status.HTTP_200_OK)
 
 class Email(APIView):
     permission_classes=(IsOfficer,)
@@ -402,9 +402,9 @@ class ApproveExcuse(APIView):
             raise Http404
     def get(self, request, excuse_id, status):
         excuse = self.get_object(excuse_id)
-        approved = status == 1
+        approved = ((int)(status)) == 1
         message = officer_functions.process_excuse(excuse, approved)
-        return JsonResponse(create_msg_dict(message), status=status.HTTP_200_OK)
+        return JsonResponse(create_msg_dict(message))
 
 class ApproveInterview(APIView):
     permission_classes=(IsOfficer,)
@@ -415,7 +415,7 @@ class ApproveInterview(APIView):
             raise Http404
     def get(self, request, interview_id, status):
         interview = self.get_object(interview_id)
-        approved = status == 1
+        approved = ((int)(status)) == 1
         message = officer_functions.process_interview(interview, approved)
         return JsonResponse(create_msg_dict(message), status=status.HTTP_200_OK)
 

@@ -93,20 +93,23 @@ Takes attendance for a gm
     List object with the user email as the key, excuse as the value
 """
 def attendance(members, meeting):
+    if(meeting.attendance_taken):
+        return;
     password = meeting.password
     excuses = {}
     for member in members:
         match = check_password(member.attendance, password)
         if match:
             add_to_meeting(member, meeting, False)
-        elif not not member.attendance.excuse: #lmao
+        elif member.attendance.excuse:
             add_excuse(member.attendance.excuse, member, meeting)
             member.attendance.excuse = ""
             member.attendance.save()
         else:
-            x = member.brother.u_absences
-            member.brother.u_absences = x+1;
+            member.brother.u_absences += 1;
             member.brother.save()
+    meeting.attendance_taken = True;
+    meeting.save()
     return meeting.excuses
 
 """
@@ -121,8 +124,8 @@ def process_excuse(excuse, approved):
     if approved:
         add_to_meeting(excuse.user, excuse.meeting, True)
     else:
-        excuse.user.u_absences += 1
-    excuse.user.save()
+        excuse.user.brother.u_absences += 1
+    excuse.user.brother.save()
     excuse.delete()
     return "set excuse to %s"%(approved)
 
