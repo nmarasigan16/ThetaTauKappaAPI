@@ -19,7 +19,8 @@ from app.serializers import (
         UserSerializer, ChapterSerializer, DemographicsSerializer,
         EventSerializer, MeetingSerializer, PledgeSerializer,
         BrotherSerializer, UserDetailsSerializer, EventDetailsSerializer,
-        AttendanceSerializer, InterviewSerializer, EmailSerializer, EventCreateSerializer
+        AttendanceSerializer, InterviewSerializer, EmailSerializer, EventCreateSerializer,
+        MeetingCreateSerializer
         )
 from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Attendance, Interview
 from app.models import UserProfile as User
@@ -311,10 +312,10 @@ class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
 
-class MeetingViewSet(viewsets.ModelViewSet):
+class CreateMeeting(generics.CreateAPIView):
     permission_classes = (IsOfficer,)
-    queryset= Meeting.objects.all()
-    serializer_class = MeetingSerializer
+    queryset = Meeting.objects.all()
+    serializer_class = MeetingCreateSerializer
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -325,6 +326,11 @@ class MeetingViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         meeting = serializer.save(self.request)
         return meeting
+
+class MeetingViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsOfficer,)
+    queryset= Meeting.objects.all()
+    serializer_class = MeetingSerializer
 
 """
 'Initiates' pledges.

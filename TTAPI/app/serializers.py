@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from datetime import datetime
+from datetime import datetime, date
 from rest_auth.serializers import UserDetailsSerializer
 from app.models import Chapter, Event, Meeting, Pledge, Brother, Demographics, Hours, Attendance, Interview, Excuse
 from app.models import UserProfile as UserProfile
@@ -66,6 +66,28 @@ class ExcuseSkeletonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Excuse
         fields = ('excuse_id', 'excuse', 'name')
+
+class MeetingCreateSerializer(serializers.ModelSerializer):
+    date = serializers.CharField()
+    chapter = serializers.SlugRelatedField(read_only=True, slug_field='chapter_name', default=None)
+    class Meta:
+        model = Meeting
+        fields = ('meeting_id', 'password', 'mtype', 'date', 'chapter')
+    def save(self, request):
+        chapter = request.user.profile.chapter
+        validated_data = self.validated_data
+        validated_data['chapter'] = chapter
+
+        sdate = validated_data.pop('date')
+        year = (int)(sdate[0:4])
+        month = (int)(sdate[4:6])
+        day = (int)(sdate[6:8])
+
+        date = date(year, month, day)
+        validated_data['date'] = date
+
+        meeting = Meeting.objects.create(**validated_data)
+        return meeting
 
 class MeetingSerializer(serializers.ModelSerializer):
     chapter = serializers.SlugRelatedField(read_only=True, required=False, slug_field = 'chapter_name')
